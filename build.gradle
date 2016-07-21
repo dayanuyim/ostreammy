@@ -1,0 +1,49 @@
+apply plugin: 'java'
+apply plugin: 'war'
+apply plugin: 'eclipse'
+apply plugin: 'eclipse-wtp'
+
+sourceCompatibility = 1.8
+webAppDirName = 'WebContent'
+sourceSets.main.java.srcDir 'src'   // 設置 Java 源碼所在目錄
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies{
+	// https://mvnrepository.com/artifact/<group>/<name>
+
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.4'
+
+    //log
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.21'
+    compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.6.1'
+    compile group: 'commons-logging', name: 'commons-logging', version: '1.2'
+    //compile group: 'log4j', name: 'log4j', version: '1.2.17'
+
+    //servlet
+    providedCompile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    compile group: 'javax.servlet.jsp.jstl', name: 'javax.servlet.jsp.jstl-api', version: '1.2.1'
+
+    //rs
+	compile group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.23.1'
+	compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '2.23.1'
+	compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc', version: '2.23.1'
+	compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc-jsp', version: '2.23.1'
+	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '2.23.1'
+	
+	//spring
+	compile group: 'org.springframework', name: 'spring-core', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-context', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-aop', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-beans', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-expression', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-test', version: '4.3.1.RELEASE'
+	
+	//test
+	testCompile 'junit:junit:4.12'
+}
