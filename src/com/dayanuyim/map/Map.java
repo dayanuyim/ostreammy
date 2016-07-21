@@ -6,6 +6,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
@@ -14,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.glassfish.jersey.message.internal.MediaTypes;
 import org.glassfish.jersey.server.mvc.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;;
@@ -34,7 +34,7 @@ public class Map
         return "Thanks to use the Map. Please specify a map to display";
     }   
  
-	@GET
+	@POST
 	@Path("/{map_id}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
     public Viewable showMap(@PathParam("map_id") String map_id,
@@ -43,8 +43,6 @@ public class Map
     		@Context HttpServletRequest request,
     		@Context HttpServletResponse response) throws Exception
     {
-    	String msg = "";
-
     	if(StringUtils.isBlank(map_id))
     		throw new IllegalArgumentException("no map specified");
 
@@ -56,17 +54,16 @@ public class Map
     	if(file_istream == null)
     		throw new IllegalArgumentException("No file uploaded");
     	
-    	
     	String filename = file_disposition.getFileName();
-
-    	msg = String.format("Show tracks[%s] in map[%s]", filename, map_id);
-    	System.out.println(msg);
+    	logger.info("show tracks '{}' in map '{}'", filename, map_id);
     	
+    	String msg = String.format("Show tracks[%s] in map[%s]", filename, map_id);
     	MapDescriptor desc = getMapDescriptor(map_id);
     	request.setAttribute("desc", desc);
     	request.setAttribute("msg", msg);
     	
     	return new Viewable("/map.jsp");
+    	//return Response.status(Status.OK).entity(new Viewable("/map.jsp")).build();
     }
     
     private MapDescriptor getMapDescriptor(String id)
