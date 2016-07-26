@@ -39,10 +39,17 @@ dependencies{
 	//spring
 	compile group: 'org.springframework', name: 'spring-core', version: '4.3.1.RELEASE'
 	compile group: 'org.springframework', name: 'spring-context', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-context-support', version: '4.3.1.RELEASE'
 	compile group: 'org.springframework', name: 'spring-aop', version: '4.3.1.RELEASE'
 	compile group: 'org.springframework', name: 'spring-beans', version: '4.3.1.RELEASE'
 	compile group: 'org.springframework', name: 'spring-expression', version: '4.3.1.RELEASE'
 	compile group: 'org.springframework', name: 'spring-test', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-web', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-webmvc', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-jdbc', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-tx', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-orm', version: '4.3.1.RELEASE'
+	compile group: 'org.springframework', name: 'spring-expression', version: '4.3.1.RELEASE'
 	
 	//test
 	testCompile 'junit:junit:4.12'

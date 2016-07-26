@@ -1,4 +1,4 @@
-package com.dayanuyim.map;
+package com.dayanuyim.ostreammy;
 
 public class MapDescriptor {
 	private String mapId;

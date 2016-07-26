@@ -1,4 +1,4 @@
-package com.dayanuyim.map;
+package com.dayanuyim.ostreammy;
 
 import java.io.InputStream;
 
@@ -20,7 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;;
 
 
-@Path("/")
+@Path("/map")
 public class Map
 {
 	private static Logger logger = LoggerFactory.getLogger(Map.class);

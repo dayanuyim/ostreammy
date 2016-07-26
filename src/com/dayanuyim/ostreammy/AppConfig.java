@@ -1,6 +1,7 @@
-package com.dayanuyim.map;
+package com.dayanuyim.ostreammy;
 
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.GET;
 
 import org.apache.log4j.BasicConfigurator;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan
-@ApplicationPath("/map")
+@ApplicationPath("/")
 public class AppConfig extends ResourceConfig
 {
 	static {
@@ -19,10 +20,15 @@ public class AppConfig extends ResourceConfig
 	}
 
 	public AppConfig(){
-		packages("com.dayanuyim.map");
+		packages("com.dayanuyim.ostreammy");
 		register(JspMvcFeature.class);
 		register(MultiPartFeature.class);
 		//register(LoggingFilter.class);
 		System.out.println("init map");
 	}
+
+	@GET
+    public String show(){
+        return "Thanks to use the Map. Please specify a map to display";
+    }   
 }
