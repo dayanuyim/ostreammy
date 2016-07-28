@@ -17,7 +17,8 @@ import org.slf4j.LoggerFactory;
 @Path("/repo")
 public class Repo {
 	
-	private static final String repo_path = "/home/tsungtatsai/web/repo";
+	public static final String repo_path = "/home/tsungtatsai/web/repo";
+	public static final String preload_path = repo_path + "/_preload";
 
 	private static Logger logger = LoggerFactory.getLogger(Repo.class);
 
@@ -44,18 +45,37 @@ public class Repo {
 		File file = getRepoData(sn);
 		if(file == null)
 			return "No data exists";
-		else
-			return "The data: " + file.getAbsolutePath();
+
+		if(file.isFile()){
+			return "Audio Track: " + file.getAbsolutePath();
+		}
+		
+		if(file.isDirectory()){
+			return "Album: " + file.getAbsolutePath();
+		}
+
+		return "Unknown data: " + file.getAbsolutePath();
 	}
 	
 	public static File getRepoData(int sn)
 	{
-		File repo = new File(repo_path);
+		File repo = new File(preload_path);
 		if(!repo.exists())
 			throw new RuntimeException("The repo folder does not exist");
 		if(!repo.isDirectory())
 			throw new RuntimeException("The repo folder is not dir");
 
+		for(File f: repo.listFiles()){
+			if(f.isDirectory() && f.list().length == 0){
+				logger.info("deleting empty dir '{}'", f.getAbsolutePath());
+				f.delete();
+				continue;
+			}
+
+			if((--sn) == 0)
+				return f;
+		}
+		/*
 		//get regular files first
 		File[] files = getDataFiles(repo);
 		if(sn <= files.length)
@@ -66,6 +86,7 @@ public class Repo {
 		File[] dirs = getDataDirs(repo);
 		if(sn <= dirs.length)
 			return dirs[sn - 1];
+		*/
 
 		return null;
 	}
