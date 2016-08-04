@@ -17,4 +17,34 @@
 		<url-pattern>/test</url-pattern>
 	</servlet-mapping>
 
+	<!--configure Spring as annotation driven and java config -->
+    <context-param>
+      <param-name>contextClass</param-name>
+      <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
+    </context-param>
+    <context-param>
+      <param-name>contextConfigLocation</param-name>
+      <param-value>com.dayanuyim.ostreammy.AppConfig</param-value>
+    </context-param>
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+	<!-- configure the Jersey-Sring servlet -->
+	<!--
+    <servlet>
+        <servlet-name>OstreammyApp</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+          <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.dayanuyim.ostreammy.AppConfig</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>OstreammyApp</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+	-->
+
 </web-app>

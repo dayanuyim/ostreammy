@@ -31,10 +31,13 @@ dependencies{
 
     //rs
 	compile group: 'org.glassfish.jersey.core', name: 'jersey-server', version: '2.23.1'
+	//compile group: 'org.glassfish.jersey.core', name: 'jersey-client', version: '2.23.1'
 	compile group: 'org.glassfish.jersey.containers', name: 'jersey-container-servlet', version: '2.23.1'
+	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '2.23.1'
 	compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc', version: '2.23.1'
 	compile group: 'org.glassfish.jersey.ext', name: 'jersey-mvc-jsp', version: '2.23.1'
-	compile group: 'org.glassfish.jersey.media', name: 'jersey-media-multipart', version: '2.23.1'
+	compile group: 'org.glassfish.jersey.ext', name: 'jersey-spring3', version: '2.23.1'
+	//compile group: 'org.glassfish.jersey.test-framework.providers', name: 'jersey-test-framework-provider-inmemory', version: '2.23.1'
 	
 	//spring
 	compile group: 'org.springframework', name: 'spring-core', version: '4.3.1.RELEASE'
