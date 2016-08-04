@@ -8,6 +8,12 @@ import java.io.RandomAccessFile;
 import java.text.ParsePosition;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
 
 import com.dayanuyim.ostreammy.Repo;
 import com.mpatric.mp3agic.ID3v1;
@@ -16,15 +22,35 @@ import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
-//@RunWith(SpringJUnit4ClassRunner.class)
-//@ContextConfiguration(classes=com.dayanuyim.ostreammy.AppConfig.class)
-public class ID3Test {
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes=com.dayanuyim.ostreammy.AppConfig.class)
+public class RepoTest {
+	@Autowired
+	@Qualifier("repo")
+	File repo;
+
+	@Test
+	public void testParams(){
+		assertNotNull(repo);
+		System.out.println(repo.getAbsolutePath());
+
+		File preload= new File(repo, "_preload");
+		assertTrue(preload.isDirectory());
+	}
+	
+	@Test
+	public void testAlbumBuilding(){
+		
+	}
 	
 	@Test
 	public void ReadID3() throws UnsupportedTagException, InvalidDataException, IOException
 	{
-		String file_path = Repo.repo_path + File.separator + "test.mp3";
-		Mp3File mp3file = new Mp3File(file_path);
+		File preload= new File(repo, "_preload");
+		File test_mp3 = new File(preload, "test.mp3");
+		assertTrue(test_mp3.isFile());
+
+		Mp3File mp3file = new Mp3File(test_mp3);
 
 		if (mp3file.hasId3v2Tag()) {
 			ID3v2 id3v2Tag = mp3file.getId3v2Tag();
@@ -51,7 +77,7 @@ public class ID3Test {
 				System.out.println("Have album image data, length: " + albumImageData.length + " bytes");
 				System.out.println("Album image mime type: " + id3v2Tag.getAlbumImageMimeType());
 				// Write image to file - can determine appropriate file extension from the mime type
-				try(RandomAccessFile file = new RandomAccessFile(Repo.preload_path + "/album-artwork", "rw")){
+				try(RandomAccessFile file = new RandomAccessFile(new File(repo, "album-artwork"), "rw")){
 					file.write(albumImageData);
 				}
 			}
@@ -68,7 +94,5 @@ public class ID3Test {
 			System.out.println("Genre: " + id3v1Tag.getGenre() + " (" + id3v1Tag.getGenreDescription() + ")");
 			System.out.println("Comment: " + id3v1Tag.getComment());
 		}
-		
-		assertNotNull("hello");
 	}
 }
