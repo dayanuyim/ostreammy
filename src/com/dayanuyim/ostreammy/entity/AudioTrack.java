@@ -10,11 +10,11 @@ public class AudioTrack {
 	private int no;
 	private int diskNo;
 	private int totalNo;
-	private long length; //sec
+	private long length; //ms
 	private Person[] artists;
 	private Person originalArtist;
 	private Person composer;
-	private String genre;
+	private String tags;
 	private String url;
 	private String comment;
 	private String sha1;
@@ -59,7 +59,7 @@ public class AudioTrack {
 	public void setLength(long length) {
 		this.length = length;
 	}
-	public Person[] getArtists() {
+	public Person[] getArtist() {
 		return artists;
 	}
 	public void setArtists(Person[] artists) {
@@ -77,11 +77,11 @@ public class AudioTrack {
 	public void setComposer(Person composer) {
 		this.composer = composer;
 	}
-	public String getGenre() {
-		return genre;
+	public String getTags() {
+		return tags;
 	}
-	public void setGenre(String genre) {
-		this.genre = genre;
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 	public String getUrl() {
 		return url;

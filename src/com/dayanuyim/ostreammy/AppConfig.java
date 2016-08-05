@@ -2,7 +2,6 @@ package com.dayanuyim.ostreammy;
 
 import java.io.File;
 
-import javax.annotation.Resource;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.GET;
 
@@ -11,7 +10,6 @@ import org.apache.log4j.BasicConfigurator;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.mvc.jsp.JspMvcFeature;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

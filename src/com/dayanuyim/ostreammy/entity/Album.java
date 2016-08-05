@@ -10,7 +10,7 @@ public class Album {
 	private String id;
 	private String name;
 	private Person artist;
-	private String genre;
+	private String tags;
 	private LocalDate publishDate;
 	private Corporation publisher;
 	private AudioTrack[] tracks;
@@ -36,11 +36,11 @@ public class Album {
 	public void setArtist(Person artist) {
 		this.artist = artist;
 	}
-	public String getGenre() {
-		return genre;
+	public String getTags() {
+		return tags;
 	}
-	public void setGenre(String genre) {
-		this.genre = genre;
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 	public LocalDate getPublishDate() {
 		return publishDate;
