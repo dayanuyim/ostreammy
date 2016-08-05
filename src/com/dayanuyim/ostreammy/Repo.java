@@ -14,31 +14,22 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
-import org.apache.commons.io.FileSystemUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.logging.log4j.spi.ThreadContextStack;
-import org.junit.Assume;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.FileCopyUtils;
-import org.w3c.dom.css.ElementCSSInlineStyle;
 
+import com.dayanuyim.ostreammy.annotation.Location;
 import com.dayanuyim.ostreammy.entity.Album;
 import com.dayanuyim.ostreammy.entity.AudioTrack;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
-
-import javassist.expr.NewArray;
 
 @Path("/repo")
 @Controller
@@ -47,18 +38,19 @@ public class Repo {
 	
 	@Autowired
 	@Qualifier("repo")
+	@Location
 	private File repo;
-
+	
 	private File preload;
 
 	@PostConstruct
 	private void init(){
-		//repo = new File(repo_path);
 		preload = new File(repo, "_preload");
 	}
 	
 	@GET
 	public String hello(){
+
 		String msg = "";
 		msg += "The page for reposiotry management:" + "<br>";
 		msg += "[repo] " + repo.getAbsolutePath() + "<br>";
