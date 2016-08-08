@@ -27,7 +27,7 @@
         <br>
 
         <label>Publish Date</label>
-        <input type="datetime" name="album_date" placeholder="yyyy-mm-dd" value="${album.publishDate}"/>
+        <input type="date" name="album_date" placeholder="yyyy-mm-dd" value="${album.publishDate}"/>
         <br>
 
         <label>Publisher</label>
@@ -35,37 +35,41 @@
         <br>
 
         <label>Comment</label>
-        <input type="textarea" name="album_comment" placeholder="Comment" value="${album.comment}"/>
+        <input type="text" name="album_comment" placeholder="Comment" value="${album.comment}"/>
         <br>
     </div>
 
+	<!-- disk list -->
     <ul class="disk tab">
-		<c:forEach var="disk" items="${album.disks}">
-			<li class="disk tabpage"><a href="#" onclick="selectDisk(event, 'disk${disk[0].diskNo}')">Disk ${disk[0].diskNo}</a></li>
+		<c:forEach var="disk" items="${album.disks}" varStatus="diskloop">
+			<li class="disk tabpage"><a href="#" onclick="selectDisk(event, 'disk${diskloop.index}')">Disk ${disk[0].diskNo}</a></li>
 		</c:forEach>
     </ul>
 
-	<c:forEach var="disk" items="${album.disks}">
-		<div id="disk${disk[0].diskNo}" class="disk tabcontent">
+	<!-- disk content -->
+	<c:forEach var="disk" items="${album.disks}" varStatus="diskloop">
+		<div id="disk${diskloop.index}" class="disk tabcontent">
 		
 			<!--  track list -->
 			<ul class="track tab">
-				<c:forEach var="track" items="${disk}">
+				<c:forEach var="track" items="${disk}" varStatus="trackloop">
 					<li class="track tabpage"><a href="#"
-						onclick="selectTrack(event, 'track${track.no}')">${track.title}</a></li>
+						onclick="selectTrack(event, 'track${diskloop.index}-${trackloop.index}')">${track.title}</a></li>
 				</c:forEach>
 			</ul>
 
 			<!--  track content -->
-			<c:forEach var="track" items="${disk}">
-				<div id="track${track.no}" class="track tabcontent">
+			<c:forEach var="track" items="${disk}" varStatus="trackloop">
+				<div id="track${diskloop.index}-${trackloop.index}" class="track tabcontent">
 					<h3>${track.title}</h3>
 					<p>${track.comment}</p>
+            		<audio src="${track.location.absolutePath}" controls loop preload="metadata"></audio>
 				</div>
 			</c:forEach>
 
 		</div>
 	</c:forEach>
+
 	<!--
     <ul class="disk tab">
         <li class="disk tabpage"><a href="#" onclick="selectDisk(event, 'disk1')">Disk I</a></li>
@@ -77,13 +81,6 @@
             <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track1')">1. 修罗の花</a></li>
             <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track2')">2. Song2</a></li>
             <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track3')">3. Song3</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track1')">4. Song4</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track2')">5. Song5</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track3')">6. Song6</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track1')">7. Song7</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track2')">8. Song8</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track3')">9. Song9</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track1')">10. Song10</a></li>
         </ul>
 
         <div id="track1" class="track tabcontent">
@@ -112,6 +109,7 @@
         <div id="track2-2" class="track tabcontent"> <h3>track2-2</h3> </div>
     </div>
 	-->
+
 </div>
 
 </body>
@@ -139,8 +137,8 @@ function selectOnly(class_name, active_elem)
         var elem = elems[i];
         if(elem !== active_elem)
             elem.className = elem.className.replace(" active", "");
-        else if(elem.className.indexOf(" active") < 0)
-            elem.className += " active";
+        else if (!elem.className.includes(" active"))
+	        elem.className += " active";
     }
 }
 
