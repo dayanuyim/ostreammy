@@ -1,10 +1,18 @@
 package com.dayanuyim.ostreammy.entity;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Objects;
 
 import javax.imageio.stream.ImageInputStream;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 public class Album {
 	private String id;
@@ -15,7 +23,7 @@ public class Album {
 	private Corporation publisher;
 	private AudioTrack[] tracks;
 	private File[] booklets;
-	private File[] othres;
+	private File[] others;
 	private String comment;
 
 	public String getId() {
@@ -58,8 +66,6 @@ public class Album {
 		return tracks;
 	}
 	public void setTracks(AudioTrack[] tracks) {
-		for(AudioTrack t: tracks)
-			t.setAlbum(this);
 		this.tracks = tracks;
 	}
 	public File[] getBooklets() {
@@ -68,11 +74,11 @@ public class Album {
 	public void setBooklets(File[] booklets) {
 		this.booklets = booklets;
 	}
-	public File[] getOthres() {
-		return othres;
+	public File[] getOthers() {
+		return others;
 	}
-	public void setOthres(File[] othres) {
-		this.othres = othres;
+	public void setOthers(File[] others) {
+		this.others = others;
 	}
 	public String getComment() {
 		return comment;
@@ -83,6 +89,31 @@ public class Album {
 	
 	//============================================
 	
+	public List<AudioTrack[]> getDisks()
+	{
+		if(ArrayUtils.getLength(tracks) == 0)
+			return null;
+
+		ArrayList<AudioTrack[]> disks = new ArrayList<>();
+
+		//group by disk no.
+		Arrays.sort(tracks, (AudioTrack t1, AudioTrack t2) -> t1.compareTo(t2));
+
+		int begin = 0;
+		for(int i = 0; i < tracks.length; ++i){
+			if(tracks[i].getDiskNo() != tracks[begin].getDiskNo()){
+				disks.add(ArrayUtils.subarray(tracks, begin, i));
+				begin = i;
+			}
+		}
+		
+		if(begin < tracks.length)
+			disks.add(ArrayUtils.subarray(tracks, begin, tracks.length));
+		
+		return disks;
+		
+	}
+
 	/*
 	public int getDiskNumber(){
 		return disks == null? 0: disks.length;

@@ -2,10 +2,11 @@ package com.dayanuyim.ostreammy.entity;
 
 import java.io.File;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature.BasicBuilder;
 
 public class AudioTrack {
-	private Album album;
 	private String title;
 	private int no;
 	private int diskNo;
@@ -23,12 +24,6 @@ public class AudioTrack {
 	private int sampleRate;
 	private boolean vbr;
 	private File location;
-	public Album getAlbum() {
-		return album;
-	}
-	public void setAlbum(Album album) {
-		this.album = album;
-	}
 	public String getTitle() {
 		return title;
 	}
@@ -133,4 +128,15 @@ public class AudioTrack {
 	}
 	
 	//===============================================
+	
+	public int compareTo(AudioTrack rhs)
+	{
+		int diff = this.diskNo - rhs.diskNo;
+		if(diff != 0) return diff;
+		
+		diff = this.no - rhs.no;
+		if(diff != 0) return diff;
+		
+		return this.title.compareTo(rhs.title);
+	}
 }

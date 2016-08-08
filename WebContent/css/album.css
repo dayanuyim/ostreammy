@@ -1,0 +1,81 @@
+body{
+    display: flex;
+}
+
+.booklet{
+    width: 10em;
+    align-content: stretch;
+    background: darkgray;
+}
+
+.album{
+    height: 10em;
+    background: lightgray;
+}
+
+.disk{
+    display: flex;
+}
+
+/* Style the list */
+.tab {
+    flex: none;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    width: 10em;
+}
+
+/* Float the list items side by side */
+/* ul.tab li {float: top;} */
+
+/* Change background color of links on hover */
+.tabpage:hover {background-color: #ddd;}
+
+/* Create an active/current tablink class */
+.tabpage:focus, .tabpage.active {background-color: #ccc;}
+
+/* Style the links inside the list items */
+.tabpage a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 10px 10px;
+    text-decoration: none;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
+
+.disk.tabcontent.active{
+    display: flex;
+}
+
+.track.tabcontent.active{
+    display: block;
+}
+
+.tabcontent {
+    -webkit-animation: fadeEffect 1s;
+    animation: fadeEffect 1s; /* Fading effect takes 1 second */
+}
+
+@-webkit-keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes fadeEffect {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}

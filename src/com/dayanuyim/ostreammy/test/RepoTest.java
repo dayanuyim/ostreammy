@@ -23,7 +23,7 @@ import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes=com.dayanuyim.ostreammy.AppConfig.class)
+@ContextConfiguration(classes=com.dayanuyim.ostreammy.JerseyConfig.class)
 public class RepoTest {
 	@Autowired
 	@Qualifier("repo")

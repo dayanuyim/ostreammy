@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
+import java.security.Permissions;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,14 +14,17 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Context;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.glassfish.jersey.server.mvc.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,35 +72,41 @@ public class Repo {
 		return msg;
 	}
 	
+	/*
 	@GET
 	@Path("/preload")
-	public String preloadTheFirst() throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException{
-		return _preload(1);
+	public Viewable preloadTheFirst(@Context HttpServletRequest request)
+					throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
+	{
+		return preload(request, 1);
 	}
+	*/
 
 	@GET
 	@Path("/preload/{sn}")
-	public String preload(@PathParam("sn") int sn) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
-	{
-		return _preload(sn);
-	}
-	
-	private String _preload(int sn) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
+	public Viewable preload(
+			@Context HttpServletRequest request,
+			@PathParam("sn") int sn) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
 	{
 		File file = getPreloadData(preload, sn);
 		if(file == null)
-			return "No data exists";
+			//return "No data";
+			return new Viewable("index.html");
 
 		if(file.isFile()){
-			return "Audio Track: " + file.getAbsolutePath();
+			//return "Audio Track: " + file.getAbsolutePath();
+			return new Viewable("index.html");
 		}
 		
 		if(file.isDirectory()){
-			buildAlbum(file);
-			return "Album: " + file.getAbsolutePath();
+			Album album = buildAlbum(file);
+			request.setAttribute("album", album);
+			//return "Album: " + file.getAbsolutePath();
+			return new Viewable("/album.jsp");
 		}
 
-		return "Unknown data: " + file.getAbsolutePath();
+		//return "Unknown data: " + file.getAbsolutePath();
+		return new Viewable("index.html");
 	}
 	
 	public static void sortByFilename(File[] files)
@@ -104,14 +114,14 @@ public class Repo {
 		Arrays.sort(files, (File f1, File f2) -> f1.getName().compareTo(f2.getName()));
 	}
 	
-	public static Album buildAlbum(File root) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
+	public static Album buildAlbum(File dir) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
 	{
-		if(root == null) throw new RuntimeException("root dir does not exist");
-		if(!root.isDirectory()) throw new RuntimeException("root dir is not dir");
+		if(dir == null) throw new RuntimeException("root dir does not exist");
+		if(!dir.isDirectory()) throw new RuntimeException("root dir is not dir");
 
 		//collect sub files and dirs
-		File[] files = root.listFiles(File::isFile);
-		File[] dirs = root.listFiles(File::isDirectory);
+		File[] files = dir.listFiles(File::isFile);
+		File[] dirs = dir.listFiles(File::isDirectory);
 		if(ArrayUtils.getLength(dirs) == 0 && ArrayUtils.getLength(files) == 0)
 			throw new RuntimeException("No files within dir to build album");
 		
@@ -122,10 +132,9 @@ public class Repo {
 
 		//a sub-dirs as a disk
 		sortByFilename(dirs);
-		for(File dir: dirs)
-			disks.add(dir.listFiles());
+		for(File d: dirs)
+			disks.add(d.listFiles());
 		
-		Album album = new Album();
 		ArrayList<AudioTrack> tracks = new ArrayList<>();
 		HashSet<File> booklets = new HashSet<>();
 		HashSet<File> others = new HashSet<>();
@@ -141,15 +150,42 @@ public class Repo {
 			}
 		}
 		
-		album.setTracks(tracks.toArray(new AudioTrack[0]));
-		
-		for(AudioTrack t: album.getTracks()){
-			logger.info("{}.{}/{} - {}", t.getDiskNo(), t.getNo(), t.getTotalNo(), t.getTitle());
+		//build album
+		Album album = (tracks.size() > 0)? mp3BuildAlbum(tracks.get(0).getLocation()): new Album();
+		if(StringUtils.isBlank(album.getName())) album.setName(dir.getName());
+
+		if(album.getArtist() == null && tracks.size() > 0)
+			album.setArtist((Person) arrayElement(tracks.get(0).getArtist(), 0));
+
+		if(tracks.size() > 0){
+			//tracks.sort((AudioTrack t1, AudioTrack t2) -> t1.compareTo(t2));
+			album.setTracks(tracks.toArray(new AudioTrack[0]));
 		}
 
-		for(File other: others){
-			logger.info("other: {}", other.getAbsolutePath());
+		if(others.size() > 0) album.setOthers(others.toArray(new File[0]));
+
+		if(booklets.size() > 0){
+			//add embedded album image
+			File embed_album_img = (File) arrayElement(album.getBooklets(), 0);
+			if(embed_album_img != null)
+				booklets.add(embed_album_img);
+			album.setBooklets(booklets.toArray(new File[0]));
 		}
+		
+		// debug print =============================
+		logger.info("alubm '{}':", album.getName());
+
+		if(album.getTracks() != null)
+			for(AudioTrack t: album.getTracks())
+				logger.info("{}.{}/{} - {}", t.getDiskNo(), t.getNo(), t.getTotalNo(), t.getTitle());
+
+		if(album.getBooklets() != null)
+			for(File booklet: album.getBooklets())
+				logger.info("booklet: {}", booklet.getAbsolutePath());
+		
+		if(album.getOthers() != null)
+			for(File other: album.getOthers())
+				logger.info("other: {}", other.getAbsolutePath());
 		
 		return album;
 	}
@@ -169,16 +205,9 @@ public class Repo {
 			String ext = FilenameUtils.getExtension(file.getName()).toLowerCase();
 			switch(ext){
 			case "mp3":
-				AudioTrack track = buildMp3Track(file);
+				AudioTrack track = mp3BuildTrack(file);
 				if(track.getDiskNo() <= 0)
 					track.setDiskNo(disk_no);
-
-				//extract embedded album image
-				File embed_album_img = (File) arrayElement(track.getAlbum().getBooklets(), 0);
-				if(embed_album_img != null){
-					booklets.add(embed_album_img);
-					track.getAlbum().setBooklets(null);
-				}
 
 				tracks.add(track);
 				break;
@@ -196,7 +225,44 @@ public class Repo {
 		return tracks;
 	}
 	
-	public static AudioTrack buildMp3Track(File file) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
+	
+	public static Album mp3BuildAlbum(File file) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
+	{
+		if(!file.isFile())
+			throw new RuntimeException("not a file");
+		
+		Mp3File mp3 = new Mp3File(file);
+
+		//dig data
+		String year = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getYear():
+						mp3.hasId3v1Tag()? mp3.getId3v1Tag().getYear(): null;
+		
+		String album_name = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getAlbum():
+						 	mp3.hasId3v1Tag()? mp3.getId3v1Tag().getAlbum(): null;
+
+		String album_artist = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getAlbumArtist(): null;
+		String publisher = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getPublisher(): null;
+		byte[] album_img = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getAlbumImage():  null;
+		String album_img_mime = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getAlbumImageMimeType():  null;
+
+		//parsing data
+		int year_num = NumberUtils.toInt(year, 0);
+		Corporation[] publishers = genCorporations(publisher, ARRAY_STR_SP);
+		Person[] artists = genPersons(album_artist, ARRAY_STR_SP);
+		File album_img_file = getAlbumImageFile(file,album_img, album_img_mime);
+		
+		//build album
+		Album album = new Album();
+		album.setName(album_name);
+		album.setArtist((Person)arrayElement(artists, 0));
+		album.setPublisher((Corporation)arrayElement(publishers, 0));
+		if(year_num > 0) album.setPublishDate(LocalDate.ofYearDay(year_num, 1));
+		if(album_img_file != null) album.setBooklets(new File[]{album_img_file});
+		
+		return album;
+	}
+
+	public static AudioTrack mp3BuildTrack(File file) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
 	{
 		if(!file.isFile())
 			throw new RuntimeException("not a file");
@@ -212,51 +278,29 @@ public class Repo {
 		String track_no = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getTrack():
 						 mp3.hasId3v1Tag()? mp3.getId3v1Tag().getTrack(): null;
 
-		String album_name = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getAlbum():
-						 	mp3.hasId3v1Tag()? mp3.getId3v1Tag().getAlbum(): null;
-
 		Integer genre = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getGenre():
 						mp3.hasId3v1Tag()? mp3.getId3v1Tag().getGenre(): null;
 
 		String genre_desc = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getGenreDescription():
 						mp3.hasId3v1Tag()? mp3.getId3v1Tag().getGenreDescription(): null;
 						
-		String year = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getYear():
-						mp3.hasId3v1Tag()? mp3.getId3v1Tag().getYear(): null;
-		
 		String comment = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getComment():
 						mp3.hasId3v1Tag()? mp3.getId3v1Tag().getComment(): null;
 						
-		String album_artist = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getAlbumArtist(): null;
 		String orig_artist = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getOriginalArtist(): null;
 		String composer = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getComposer(): null;
-		String publisher = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getPublisher(): null;
 		String url = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getUrl(): null;
 		String encoder = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getEncoder(): null;
 		
-		byte[] album_img = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getAlbumImage():  null;
-		String album_img_mime = mp3.hasId3v2Tag()? mp3.getId3v2Tag().getAlbumImageMimeType():  null;
-
 		//parsing data ================================================
-		int year_num = NumberUtils.toInt(year, 0);
 		int[] track_nos = parseTrackNo(track_no);
-		Person[] artists = genPersons(artist + ARRAY_STR_SP + album_artist, ARRAY_STR_SP);
+		Person[] artists = genPersons(artist, ARRAY_STR_SP);
 		Person[] orig_artists = genPersons(orig_artist, ARRAY_STR_SP);
 		Person[] composers = genPersons(composer, ARRAY_STR_SP);
 		String[] tags = uniqueSplit(genre_desc, ARRAY_STR_SP);
-		Corporation[] publishers = genCorporations(publisher, ARRAY_STR_SP);
-		File album_img_file = getAlbumImageFile(file,album_img, album_img_mime);
 		
-		//for album
-		Album album = new Album();
-		album.setName(album_name);
-		album.setPublisher((Corporation)arrayElement(publishers, 0));
-		if(year_num > 0) album.setPublishDate(LocalDate.ofYearDay(year_num, 1));
-		if(album_img_file != null) album.setBooklets(new File[]{album_img_file});
-
 		//fill up track
 		AudioTrack track = new AudioTrack();
-		track.setAlbum(album);
 		track.setTitle(StringUtils.isBlank(title)? file.getName(): title);
 		track.setDiskNo(track_nos[0]);
 		track.setNo(track_nos[1]);
@@ -307,6 +351,9 @@ public class Repo {
 	// <disk_no>.<track_no>/<total_no>
 	public static int[] parseTrackNo(String s)
 	{
+		if(s == null)
+			return new int[]{0, 0, 0};
+
 		int pos = s.indexOf('.');
 		int disk_no = (pos < 0)? 0: NumberUtils.toInt(s.substring(0, pos), 0);
 
