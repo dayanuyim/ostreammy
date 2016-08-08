@@ -2,14 +2,7 @@ package com.dayanuyim.ostreammy;
 
 import java.io.File;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.GET;
-
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.BasicConfigurator;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.mvc.jsp.JspMvcFeature;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,31 +10,34 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import com.dayanuyim.ostreammy.annotation.Location;
 
 @Configuration
+@EnableWebMvc
 @PropertySource("classpath:/app.properties")
 @ComponentScan
-@ApplicationPath("/")
-public class AppConfig extends ResourceConfig
+public class SpringConfig extends WebMvcConfigurerAdapter
 {
-	static {
-		BasicConfigurator.configure();
+	@Override
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+		configurer.enable();
 	}
 
-	public AppConfig(){
-		packages("com.dayanuyim.ostreammy");
-		register(JspMvcFeature.class);
-		register(MultiPartFeature.class);
-		System.out.println("init map");
+	@Bean
+	public ViewResolver viewResolver() {
+		InternalResourceViewResolver resolver = new InternalResourceViewResolver();
+		resolver.setPrefix("/WEB-INF/views/");
+		resolver.setSuffix(".jsp");
+		resolver.setExposeContextBeansAsAttributes(true);
+		return resolver;
 	}
-	
-	@GET
-    public String show(){
-        return "Thanks to use the Map. Please specify a map to display";
-    }   
-	
+
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
