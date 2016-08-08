@@ -1,4 +1,4 @@
-package com.dayanuyim.ostreammy;
+package com.dayanuyim.ostreammy.config;
 
 import javax.ws.rs.ApplicationPath;
 
