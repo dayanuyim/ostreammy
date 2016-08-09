@@ -1,4 +1,6 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <!DOCTYPE html>
 <html>
@@ -63,7 +65,8 @@
 				<div id="track${diskloop.index}-${trackloop.index}" class="track tabcontent">
 					<h3>${track.title}</h3>
 					<p>${track.comment}</p>
-            		<audio src="${track.location.absolutePath}" controls loop preload="metadata"></audio>
+					<c:set var="repoPath" value="${fn:substringAfter(track.location.absolutePath, repo.absolutePath)}" />
+            		<audio src="${prefixPath}${fn:replace(repoPath, '\\', '/')}" controls loop preload="metadata"></audio>
 				</div>
 			</c:forEach>
 
@@ -125,6 +128,8 @@ function selectTrack(evt, track_id) {
 function selectPage(page_evt, content_id, type) {
     //hightlight TabPage of type
     selectOnly(type + " tabpage", page_evt.currentTarget.parentElement);
+    
+    //TODO sotp the playing audio
 
     //highlight TabContent of type
     selectOnly(type + " tabcontent", document.getElementById(content_id));

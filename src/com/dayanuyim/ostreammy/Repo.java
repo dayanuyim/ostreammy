@@ -1,8 +1,10 @@
 package com.dayanuyim.ostreammy;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.security.NoSuchAlgorithmException;
 import java.security.Permissions;
@@ -13,14 +15,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -32,6 +41,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
 import com.dayanuyim.ostreammy.annotation.Location;
+import com.dayanuyim.ostreammy.config.JerseyConfig;
 import com.dayanuyim.ostreammy.entity.Album;
 import com.dayanuyim.ostreammy.entity.AudioTrack;
 import com.dayanuyim.ostreammy.entity.Corporation;
@@ -41,11 +51,17 @@ import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
 import static com.dayanuyim.ostreammy.Utils.*;
+import static javax.servlet.http.HttpServletResponse.*;
 
-@Path("/repo")
+@Path(Repo.URI_PATH)
 @Controller
 public class Repo {
+	public static final String URI_PATH = "/repo";
+	public static final String DEF_ALBUM_IMG_NAME = "default_album_image";
+	public static final String ARRAY_STR_SP = ";";
+
 	private static Logger logger = LoggerFactory.getLogger(Repo.class);
+
 	
 	@Autowired
 	@Qualifier("repo")
@@ -54,22 +70,35 @@ public class Repo {
 	
 	private File preload;
 	
-	private static String DEF_ALBUM_IMG_NAME = "default_album_image";
-	private static String ARRAY_STR_SP = ";";
-
 	@PostConstruct
 	private void init(){
 		preload = new File(repo, "_preload");
 	}
 	
 	@GET
-	public String hello(){
-
+	public String hello(
+			@Context HttpServletRequest request)
+	{
 		String msg = "";
 		msg += "The page for reposiotry management:" + "<br>";
 		msg += "[repo] " + repo.getAbsolutePath() + "<br>";
 		msg += "[preload] " + preload.getAbsolutePath() + "<br>";
 		return msg;
+	}
+
+	@GET
+	@Path("/{all:.+}")
+	public Response download(
+			@Context HttpServletRequest request,
+			@Context HttpServletResponse response) throws FileNotFoundException, IOException
+	{
+		String path = request.getPathInfo().substring(Repo.URI_PATH.length());
+		File file = new File(repo, path);
+		if(!file.exists())
+			throw new WebApplicationException(Status.NOT_FOUND);
+
+		String mime = new MimetypesFileTypeMap().getContentType(file);
+		return Response.ok(file, mime).build();
 	}
 	
 	/*
@@ -101,6 +130,8 @@ public class Repo {
 		if(file.isDirectory()){
 			Album album = buildAlbum(file);
 			request.setAttribute("album", album);
+			request.setAttribute("repo", repo);
+			request.setAttribute("prefixPath", JerseyConfig.URI_PATH + Repo.URI_PATH);
 			//return "Album: " + file.getAbsolutePath();
 			return new Viewable("/album.jsp");
 		}

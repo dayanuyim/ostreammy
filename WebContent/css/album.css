@@ -26,7 +26,7 @@ body{
     overflow: hidden;
     border: 1px solid #ccc;
     background-color: #f1f1f1;
-    width: 10em;
+    min-width: 10em;
 }
 
 /* Float the list items side by side */
@@ -42,7 +42,7 @@ body{
 .tabpage a {
     display: block;
     color: black;
-    text-align: center;
+    text-align: left;
     padding: 10px 10px;
     text-decoration: none;
     transition: 0.3s;
