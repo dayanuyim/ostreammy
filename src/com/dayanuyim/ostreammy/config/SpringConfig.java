@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
@@ -21,32 +22,12 @@ import com.dayanuyim.ostreammy.App;
 import com.dayanuyim.ostreammy.annotation.Location;
 
 @Configuration
+//ensure the dev properties, if any, is imported after the default properties
+@Import({DefaultPropertiesConfig.class, DevPropertiesConfig.class})
 @EnableWebMvc
 @ComponentScan(basePackageClasses=com.dayanuyim.ostreammy.App.class)
 public class SpringConfig extends WebMvcConfigurerAdapter
 {
-	
-	//properties =============================
-	@Configuration
-    @Profile("default")
-    @PropertySource("classpath:/app.properties")
-    static class Default
-    {
-		static{
-			System.out.println("Spring property source: default");
-		}
-    }
-
-    @Configuration
-    @Profile("dev")
-    @PropertySource({"classpath:/app.properties", "classpath:/app-dev.properties"})
-    static class Dev
-    {
-    	static{
-    		System.out.println("Spring property source: dev");
-    	}
-    }
-
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
 		return new PropertySourcesPlaceholderConfigurer();
@@ -67,7 +48,6 @@ public class SpringConfig extends WebMvcConfigurerAdapter
 		resolver.setExposeContextBeansAsAttributes(true);
 		return resolver;
 	}
-
 
 	// bean =========================
 	@Bean
