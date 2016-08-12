@@ -7,11 +7,26 @@ body{
     align-content: stretch;
     background: darkgray;
 }
+.booklet-img{
+    width: 10em;
+}
 
 .album{
-    height: 10em;
+	display: flex;
+    min-height: 10em;
     background: lightgray;
+    padding: 10px;
 }
+
+.album-cover{
+	width: 300px;
+	height: 300px;
+	margin-right: 10px;
+}
+
+.album-info{
+}
+
 
 .disk{
     display: flex;
@@ -39,8 +54,11 @@ body{
 .tabpage:focus, .tabpage.active {background-color: #ccc;}
 
 /* Style the links inside the list items */
+.tabpage {
+}
+
 .tabpage a {
-    display: block;
+    display: inline-block;
     color: black;
     text-align: left;
     padding: 10px 10px;

@@ -1,50 +1,66 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="app" tagdir="/WEB-INF/tags" %>
 
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <link rel="icon" href="/favicon.svg" />
-    <link rel="stylesheet" type="text/css", href="/css/album.css" />
+    <link rel="stylesheet" type="text/css" href="/css/album.css" />
+    <link rel="stylesheet" type="text/css" href="/css/font-awesome.min.css" />
+    <script type="text/javascript" src="/js/jquery.min.js" ></script>
+
     <title>${album.name}</title>
 </head>
 <body>
 
 <aside class="booklet">
-    <div>Cover</div>
-    <div>1</div>
-    <div>2</div>
+	<c:forEach var="booklet" items="${album.booklets}" varStatus="diskloop">
+		<app:servPath local="${booklet.absolutePath}" local_prefix="${repo.absolutePath}" serv_prefix="${prefixPath}" />
+	<%--
+		<c:set var="path" value="${fn:substringAfter(booklet.absolutePath, repo.absolutePath)}" />
+		<img src="${prefixPath}${fn:replace(path, '\\', '/')}" alt="Album Cover" class="booklet-img">
+	--%>
+    </c:forEach>
 </aside>
 
 <div style="flex:1">
     <div class="album">
-        <label>Artist</label>
-        <input type="text" name="album_artist" placeholder="Artist" value="${album.artist.name}"/>
-        <br>
+		<c:set var="coverPath" value="${fn:substringAfter(album.cover.absolutePath, repo.absolutePath)}" />
+		<img src="${prefixPath}${fn:replace(coverPath, '\\', '/')}" alt="Album Cover" class="album-cover">
 
-        <label>Album Name</label>
-        <input type="text" name="album_name" placeholder="Name" value="${album.name}"/>
-        <br>
+		<div class="album-info">
+			<i class="fa fa-user"></i>
+			<input type="text" name="album_artist" placeholder="Artist" value="${album.artist.name}"/>
+			<br>
 
-        <label>Publish Date</label>
-        <input type="date" name="album_date" placeholder="yyyy-mm-dd" value="${album.publishDate}"/>
-        <br>
+			<i class="fa fa-font"></i>
+			<input type="text" name="album_name" placeholder="Name" value="${album.name}"/>
+			<br>
 
-        <label>Publisher</label>
-        <input type="text" name="album_publisher" placeholder="Publisher" value="${album.publisher}"/>
-        <br>
+			<i class="fa fa-calendar-o"></i>
+			<input type="date" name="album_date" placeholder="yyyy-mm-dd" value="${album.publishDate}"/>
+			<br>
 
-        <label>Comment</label>
-        <input type="text" name="album_comment" placeholder="Comment" value="${album.comment}"/>
-        <br>
+			<i class="fa fa-building"></i>
+			<input type="text" name="album_publisher" placeholder="Publisher" value="${album.publisher}"/>
+			<br>
+
+			<i class="fa fa-sticky-note-o"></i>
+			<input type="text" name="album_comment" placeholder="Comment" value="${album.comment}"/>
+			<br>
+        </div>
     </div>
 
 	<!-- disk list -->
     <ul class="disk tab">
 		<c:forEach var="disk" items="${album.disks}" varStatus="diskloop">
-			<li class="disk tabpage"><a href="#" onclick="selectDisk(event, 'disk${diskloop.index}')">Disk ${disk[0].diskNo}</a></li>
+			<li class="disk tabpage">
+				<a href="#" onclick="selectDisk(event, 'disk${diskloop.index}')">
+					<i class="fa fa-dot-circle-o"></i>Disk ${disk[0].diskNo}</a>
+			</li>
 		</c:forEach>
     </ul>
 
@@ -55,18 +71,33 @@
 			<!--  track list -->
 			<ul class="track tab">
 				<c:forEach var="track" items="${disk}" varStatus="trackloop">
-					<li class="track tabpage"><a href="#"
-						onclick="selectTrack(event, 'track${diskloop.index}-${trackloop.index}')">${track.title}</a></li>
+					<li class="track tabpage">
+						<i class="fa fa-music"></i>
+						<a href="#" onclick="selectTrack(event, 'track${diskloop.index}-${trackloop.index}')">${track.title}</a>
+					</li>
 				</c:forEach>
 			</ul>
 
 			<!--  track content -->
 			<c:forEach var="track" items="${disk}" varStatus="trackloop">
 				<div id="track${diskloop.index}-${trackloop.index}" class="track tabcontent">
-					<h3>${track.title}</h3>
-					<p>${track.comment}</p>
+
 					<c:set var="repoPath" value="${fn:substringAfter(track.location.absolutePath, repo.absolutePath)}" />
             		<audio src="${prefixPath}${fn:replace(repoPath, '\\', '/')}" controls loop preload="metadata"></audio>
+            		<br>
+
+					<i class="fa fa-font"></i>
+					<input type="text" name="track_title" placeholder="Title" value="${track.title}"/>
+					<br>
+
+					<c:forEach var="artist" items="${track.artists}">
+						<i class="fa fa-user"></i>
+						<input type="text" name="track_artist" placeholder="Artists" value="${artist.name}"/>
+						<br>
+					</c:forEach>
+
+					<p>${track.comment}</p>
+
 				</div>
 			</c:forEach>
 
@@ -122,6 +153,7 @@ function selectDisk(evt, disk_id) {
 }
 
 function selectTrack(evt, track_id) {
+    $(".active audio").trigger('pause');
     selectPage(evt, track_id, 'track');
 }
 
@@ -129,8 +161,6 @@ function selectPage(page_evt, content_id, type) {
     //hightlight TabPage of type
     selectOnly(type + " tabpage", page_evt.currentTarget.parentElement);
     
-    //TODO sotp the playing audio
-
     //highlight TabContent of type
     selectOnly(type + " tabcontent", document.getElementById(content_id));
 }
