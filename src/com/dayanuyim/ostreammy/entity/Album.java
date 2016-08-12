@@ -114,11 +114,9 @@ public class Album {
 		
 	}
 
-	/*
-	public int getDiskNumber(){
-		return disks == null? 0: disks.length;
+	public File getCover(){
+		if(ArrayUtils.getLength(booklets) > 0)
+			return booklets[0];
+		return null;
 	}
-	*/
-	
-
 }

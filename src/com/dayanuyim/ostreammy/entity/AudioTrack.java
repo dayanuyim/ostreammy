@@ -54,7 +54,7 @@ public class AudioTrack {
 	public void setLength(long length) {
 		this.length = length;
 	}
-	public Person[] getArtist() {
+	public Person[] getArtists() {
 		return artists;
 	}
 	public void setArtists(Person[] artists) {

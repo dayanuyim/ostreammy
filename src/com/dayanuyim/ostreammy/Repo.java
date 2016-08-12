@@ -186,7 +186,7 @@ public class Repo {
 		if(StringUtils.isBlank(album.getName())) album.setName(dir.getName());
 
 		if(album.getArtist() == null && tracks.size() > 0)
-			album.setArtist((Person) arrayElement(tracks.get(0).getArtist(), 0));
+			album.setArtist((Person) arrayElement(tracks.get(0).getArtists(), 0));
 
 		if(tracks.size() > 0){
 			//tracks.sort((AudioTrack t1, AudioTrack t2) -> t1.compareTo(t2));
