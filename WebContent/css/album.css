@@ -19,12 +19,13 @@ body{
 }
 
 .album-cover{
-	width: 300px;
-	height: 300px;
+	width: 200px;
+	height: 200px;
 	margin-right: 10px;
 }
 
-.album-info{
+.album-info i{
+	display: block;
 }
 
 
@@ -81,6 +82,10 @@ body{
 
 .track.tabcontent.active{
     display: block;
+}
+
+.tabcontent i{
+	display: block;
 }
 
 .tabcontent {

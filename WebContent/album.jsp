@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="app" tagdir="/WEB-INF/tags" %>
 
 <!DOCTYPE html>
@@ -17,40 +18,32 @@
 <body>
 
 <aside class="booklet">
-	<c:forEach var="booklet" items="${album.booklets}" varStatus="diskloop">
-		<app:servPath local="${booklet.absolutePath}" local_prefix="${repo.absolutePath}" serv_prefix="${prefixPath}" />
-	<%--
-		<c:set var="path" value="${fn:substringAfter(booklet.absolutePath, repo.absolutePath)}" />
-		<img src="${prefixPath}${fn:replace(path, '\\', '/')}" alt="Album Cover" class="booklet-img">
-	--%>
+	<c:forEach var="booklet" items="${album.booklets}" varStatus="s">
+		<img src='<app:servPath local="${booklet}" local_home="${repo}" serv_prefix="${prefixPath}" />'
+			alt="booklet${s.count}" class="booklet-img">
     </c:forEach>
 </aside>
 
 <div style="flex:1">
     <div class="album">
-		<c:set var="coverPath" value="${fn:substringAfter(album.cover.absolutePath, repo.absolutePath)}" />
-		<img src="${prefixPath}${fn:replace(coverPath, '\\', '/')}" alt="Album Cover" class="album-cover">
+		<img src='<app:servPath local="${album.cover}" local_home="${repo}" serv_prefix="${prefixPath}" />'
+			alt="Album Cover" class="album-cover">
 
 		<div class="album-info">
-			<i class="fa fa-user"></i>
-			<input type="text" name="album_artist" placeholder="Artist" value="${album.artist.name}"/>
-			<br>
+			<i class="fa fa-user">
+				<input type="text" name="album_artist" placeholder="Artist" value="${album.artist.name}"/></i>
 
-			<i class="fa fa-font"></i>
-			<input type="text" name="album_name" placeholder="Name" value="${album.name}"/>
-			<br>
+			<i class="fa fa-font">
+			<input type="text" name="album_name" placeholder="Name" value="${album.name}"/></i>
 
-			<i class="fa fa-calendar-o"></i>
-			<input type="date" name="album_date" placeholder="yyyy-mm-dd" value="${album.publishDate}"/>
-			<br>
+			<i class="fa fa-calendar-o">
+			<input type="date" name="album_date" placeholder="yyyy-mm-dd" value="${album.publishDate}"/></i>
 
-			<i class="fa fa-building"></i>
-			<input type="text" name="album_publisher" placeholder="Publisher" value="${album.publisher}"/>
-			<br>
+			<i class="fa fa-building">
+			<input type="text" name="album_publisher" placeholder="Publisher" value="${album.publisher}"/></i>
 
-			<i class="fa fa-sticky-note-o"></i>
-			<input type="text" name="album_comment" placeholder="Comment" value="${album.comment}"/>
-			<br>
+			<i class="fa fa-sticky-note-o">
+			<input type="text" name="album_comment" placeholder="Comment" value="${album.comment}"/></i>
         </div>
     </div>
 
@@ -58,45 +51,87 @@
     <ul class="disk tab">
 		<c:forEach var="disk" items="${album.disks}" varStatus="diskloop">
 			<li class="disk tabpage">
-				<a href="#" onclick="selectDisk(event, 'disk${diskloop.index}')">
-					<i class="fa fa-dot-circle-o"></i>Disk ${disk[0].diskNo}</a>
+				<a href="#" onclick="selectDisk(event, 'disk${diskloop.count}')">
+					<i class="fa fa-dot-circle-o">Disk ${disk[0].diskNo}</i></a>
 			</li>
 		</c:forEach>
     </ul>
 
 	<!-- disk content -->
 	<c:forEach var="disk" items="${album.disks}" varStatus="diskloop">
-		<div id="disk${diskloop.index}" class="disk tabcontent">
+		<div id="disk${diskloop.count}" class="disk tabcontent">
 		
 			<!--  track list -->
 			<ul class="track tab">
 				<c:forEach var="track" items="${disk}" varStatus="trackloop">
 					<li class="track tabpage">
-						<i class="fa fa-music"></i>
-						<a href="#" onclick="selectTrack(event, 'track${diskloop.index}-${trackloop.index}')">${track.title}</a>
+						<a href="#" onclick="selectTrack(event, 'track${diskloop.count}-${trackloop.count}')">
+							<i class="fa fa-music">${track.title}</i></a>
 					</li>
 				</c:forEach>
 			</ul>
 
 			<!--  track content -->
 			<c:forEach var="track" items="${disk}" varStatus="trackloop">
-				<div id="track${diskloop.index}-${trackloop.index}" class="track tabcontent">
+				<div id="track${diskloop.count}-${trackloop.count}" class="track tabcontent">
 
-					<c:set var="repoPath" value="${fn:substringAfter(track.location.absolutePath, repo.absolutePath)}" />
-            		<audio src="${prefixPath}${fn:replace(repoPath, '\\', '/')}" controls loop preload="metadata"></audio>
-            		<br>
+					<!--
+					<audio src='<app:servPath local="${track.location}" local_home="${repo}" serv_prefix="${prefixPath}" />'
+            			controls preload="none"></audio>
+					-->
+					<audio controls preload="none">
+						<source type="audio/mpeg" src='<app:servPath local="${track.location}" local_home="${repo}" serv_prefix="${prefixPath}" />' >
+					</audio>
 
-					<i class="fa fa-font"></i>
-					<input type="text" name="track_title" placeholder="Title" value="${track.title}"/>
-					<br>
-
+					<i class="fa fa-font">
+						<input type="text" name="track_title" placeholder="Title" value="${track.title}"/></i>
+						
 					<c:forEach var="artist" items="${track.artists}">
-						<i class="fa fa-user"></i>
-						<input type="text" name="track_artist" placeholder="Artists" value="${artist.name}"/>
-						<br>
+						<i class="fa fa-user">
+							<input type="text" name="track_artist" placeholder="Artists" value="${artist.name}"/></i>
 					</c:forEach>
 
-					<p>${track.comment}</p>
+					<i class="fa fa-user">
+						<input type="text" name="track_original_artist" placeholder="Original Artist" value="${track.originalArtist.name}"/></i>
+
+					<i class="fa fa-user">
+						<input type="text" name="track_composer" placeholder="Composer" value="${track.composer.name}"/></i>
+
+					<i class="fa fa-list-alt">
+						<input type="number" name="track_disk_no" min="1" value="${track.diskNo}"/></i>
+
+					<i class="fa fa-list-ol">
+						<input type="number" name="track_no" min="1" value="${track.no}"/>
+						of<input type="number" name="track_total_no" min="1" value="${track.totalNo}"/>
+					</i>
+
+					<i class="fa fa-clock-o">
+						<fmt:formatDate value="${track.length}" pattern="mm:ss"/>
+						<input type="hidden" name="track_length" value="${track.length.time}" /></i>
+
+					<i class="fa fa-font">
+						<input type="text" name="track_tags" placeholder="Tags" value="${track.tags}"/></i>
+
+					<i class="fa fa-font">
+						<input type="text" name="track_url" placeholder="url" value="${track.url}"/></i>
+
+					<i class="fa fa-font">
+						<input type="text" name="track_sha1" placeholder="sha1" value="${track.sha1}" readonly /></i>
+
+					<i class="fa fa-font">
+						<input type="text" name="track_encoder" placeholder="encoder" value="${track.encoder}"/></i>
+
+					<i class="fa fa-font">
+						<input type="text" name="track_bitrate" placeholder="bitrate" value="${track.bitrate}" readonly /></i>
+
+					<i class="fa fa-font">
+						<input type="text" name="track_sample_rate" placeholder="sample rate" value="${track.sampleRate}" readonly /></i>
+
+					<i class="fa fa-font">
+						<input type="text" name="track_vbr" placeholder="VBR" value="${track.vbr}" readonly /></i>
+
+					<i class="fa fa-sticky-note-o">
+						<input type="text" name="track_comment" placeholder="Comment" value="${track.comment}"/></i>
 
 				</div>
 			</c:forEach>

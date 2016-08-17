@@ -3,19 +3,12 @@
 <%@ taglib prefix="c"   uri="http://java.sun.com/jsp/jstl/core" %> 
 <%@ taglib prefix="fn"  uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<%@ attribute name="local"        rtexprvalue="true" required="true" type="java.lang.String" description="The Local Path" %> 
-<%@ attribute name="local_prefix" rtexprvalue="true" required="true" type="java.lang.String" description="The prefix local path you want to change" %> 
-<%@ attribute name="serv_prefix"  rtexprvalue="true" required="true" type="java.lang.String" description="The prefix server path you changed to" %> 
+<%@ attribute name="local"       rtexprvalue="true" required="true" type="java.io.File"     description="The Local File" %> 
+<%@ attribute name="local_home"  rtexprvalue="true" required="true" type="java.io.File"     description="The Local Home Dir containing the file" %> 
+<%@ attribute name="serv_prefix" rtexprvalue="true" required="true" type="java.lang.String" description="The prefix server path you wnat to change to" %> 
 
-
-<c:set var="path" value="${fn:substringAfter(local, local_prefix)}" />
+<c:set var="path" value="${fn:substringAfter(local.absolutePath, local_home.absolutePath)}" />
+${serv_prefix}${fn:replace(path, '\\', '/')}
 <%--
-${local}<br>
-${local_prefix}<br>
-${serv_prefix}<br>
-
-<c:set var="path2" value="${fn:replace(path, '\\', '/')}" />
-<c:out value="${path2}" />
 <c:out value="${serv_prefix}${fn:replace(path, '\\', '/')}" />
 --%>
-${path}

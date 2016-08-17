@@ -1,6 +1,7 @@
 package com.dayanuyim.ostreammy.entity;
 
 import java.io.File;
+import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -11,7 +12,7 @@ public class AudioTrack {
 	private int no;
 	private int diskNo;
 	private int totalNo;
-	private long length; //ms
+	private Date length;
 	private Person[] artists;
 	private Person originalArtist;
 	private Person composer;
@@ -24,6 +25,7 @@ public class AudioTrack {
 	private int sampleRate;
 	private boolean vbr;
 	private File location;
+
 	public String getTitle() {
 		return title;
 	}
@@ -48,10 +50,10 @@ public class AudioTrack {
 	public void setTotalNo(int totalNo) {
 		this.totalNo = totalNo;
 	}
-	public long getLength() {
+	public Date getLength() {
 		return length;
 	}
-	public void setLength(long length) {
+	public void setLength(Date length) {
 		this.length = length;
 	}
 	public Person[] getArtists() {

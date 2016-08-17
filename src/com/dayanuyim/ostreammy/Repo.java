@@ -11,6 +11,7 @@ import java.security.Permissions;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -336,7 +337,7 @@ public class Repo {
 		track.setDiskNo(track_nos[0]);
 		track.setNo(track_nos[1]);
 		track.setTotalNo(track_nos[2]);
-		track.setLength(mp3.getLengthInMilliseconds());
+		track.setLength(new Date(mp3.getLengthInMilliseconds()));
 		track.setArtists(artists);
 		track.setOriginalArtist((Person)arrayElement(orig_artists, 0));
 		track.setComposer((Person)arrayElement(composers, 0));  //only the first person
