@@ -1,5 +1,6 @@
-package com.dayanuyim.ostreammy;
+package com.dayanuyim.ostreammy.map;
 
+/*
 import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
@@ -46,11 +47,10 @@ public class Map
     	if(StringUtils.isBlank(map_id))
     		throw new IllegalArgumentException("no map specified");
 
-    	/*
-    	String gps_path = request.getParameter("file");
-    	if(StringUtils.isBlank(gps_path))
-    		msg = "Please provide gps file";
-    	*/
+    	//String gps_path = request.getParameter("file");
+    	//if(StringUtils.isBlank(gps_path))
+    	//	msg = "Please provide gps file";
+
     	if(file_istream == null)
     		throw new IllegalArgumentException("No file uploaded");
     	
@@ -75,3 +75,4 @@ public class Map
     }
 
 }
+*/
