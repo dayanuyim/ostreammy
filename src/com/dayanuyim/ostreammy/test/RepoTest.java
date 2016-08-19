@@ -1,5 +1,6 @@
 package com.dayanuyim.ostreammy.test;
 
+/*
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -23,7 +24,7 @@ import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes=com.dayanuyim.ostreammy.config.SpringConfig.class)
+@ContextConfiguration(classes=com.dayanuyim.ostreammy.config.WebConfig.class)
 public class RepoTest {
 	@Autowired
 	@Qualifier("repo")
@@ -96,3 +97,4 @@ public class RepoTest {
 		}
 	}
 }
+*/

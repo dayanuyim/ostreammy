@@ -11,6 +11,8 @@
 		<welcome-file>index.jsp</welcome-file>
 	</welcome-file-list>
 
+	<!-- map -->
+	<!--
 	<servlet>
 		<servlet-name>MapServlet</servlet-name>
 		<servlet-class>com.dayanuyim.map.Map</servlet-class>
@@ -19,23 +21,26 @@
 		<servlet-name>MapServlet</servlet-name>
 		<url-pattern>/test</url-pattern>
 	</servlet-mapping>
+	-->
 	
 	<!--
 	<mvc:resources mapping="/static /**" location="/static/" />
 	-->
 
 	<!--configure Spring as annotation driven and java config -->
+	<!--
     <context-param>
       <param-name>contextClass</param-name>
       <param-value>org.springframework.web.context.support.AnnotationConfigWebApplicationContext</param-value>
     </context-param>
     <context-param>
       <param-name>contextConfigLocation</param-name>
-      <param-value>com.dayanuyim.ostreammy.config.SpringConfig</param-value>
+      <param-value>com.dayanuyim.ostreammy.config.WebConfig</param-value>
     </context-param>
     <listener>
         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
     </listener>
+	-->
 
 	<!-- configure the Jersey-Sring servlet -->
 	<!--
