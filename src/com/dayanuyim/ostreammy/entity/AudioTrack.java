@@ -3,10 +3,6 @@ package com.dayanuyim.ostreammy.entity;
 import java.io.File;
 import java.util.Date;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature.BasicBuilder;
-
 public class AudioTrack {
 	private String title;
 	private int no;

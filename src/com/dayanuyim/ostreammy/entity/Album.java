@@ -1,16 +1,10 @@
 package com.dayanuyim.ostreammy.entity;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Objects;
-
-import javax.imageio.stream.ImageInputStream;
 
 import org.apache.commons.lang3.ArrayUtils;
 

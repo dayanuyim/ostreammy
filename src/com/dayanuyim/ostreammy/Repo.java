@@ -1,13 +1,12 @@
 package com.dayanuyim.ostreammy;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.security.NoSuchAlgorithmException;
-import java.security.Permissions;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,33 +15,28 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.activation.MimetypesFileTypeMap;
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
-
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.glassfish.jersey.server.mvc.Viewable;
+//import org.glassfish.jersey.server.mvc.Viewable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
 
 import com.dayanuyim.ostreammy.annotation.Location;
-import com.dayanuyim.ostreammy.config.JerseyConfig;
 import com.dayanuyim.ostreammy.entity.Album;
 import com.dayanuyim.ostreammy.entity.AudioTrack;
 import com.dayanuyim.ostreammy.entity.Corporation;
@@ -52,12 +46,14 @@ import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
 import static com.dayanuyim.ostreammy.Utils.*;
-import static javax.servlet.http.HttpServletResponse.*;
+import static org.apache.commons.lang3.StringUtils.*;
 
-@Path(Repo.URI_PATH)
+@RequestMapping(value=Repo.URI_PATH)
 @Controller
 public class Repo {
 	public static final String URI_PATH = "/repo";
+
+	public static final String PRELOAD_PATH = "/_";
 	public static final String DEF_ALBUM_IMG_NAME = "default_album_image";
 	public static final String ARRAY_STR_SP = ";";
 
@@ -65,81 +61,120 @@ public class Repo {
 
 	
 	@Autowired
-	@Qualifier("repo")
-	@Location
+	@Qualifier("repo") @Location
 	private File repo;
 	
+	@Autowired
+	@Qualifier("preload") @Location
 	private File preload;
 	
-	@PostConstruct
-	private void init(){
-		preload = new File(repo, "_preload");
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleResourceNotFoundException() {
+        return null;
+    }
+	
+	@GetMapping
+	public String info(Model model)
+	{
+		model.addAttribute("repo", repo);
+		model.addAttribute("preload", preload);
+		return "repo_info";
+	}
+
+	@GetMapping("/**")
+	@ResponseBody
+	public FileSystemResource download(HttpServletRequest req) throws UnsupportedEncodingException
+	{
+		String sub_uri = req.getServletPath() + defaultString(req.getPathInfo());
+		sub_uri = sub_uri.substring(URI_PATH.length());
+		return downloadFile(preload, sub_uri);
+	}
+
+	@GetMapping(Repo.PRELOAD_PATH + "/**")
+	@ResponseBody
+	public FileSystemResource downloadPreload(HttpServletRequest req) throws UnsupportedEncodingException
+	{
+		String sub_uri = req.getServletPath() + defaultString(req.getPathInfo());
+		sub_uri = sub_uri.substring((URI_PATH + PRELOAD_PATH).length());
+		return downloadFile(preload, sub_uri);
 	}
 	
-	@GET
-	public String hello(
-			@Context HttpServletRequest request)
+	private FileSystemResource downloadFile(File dir, String sub_uri) throws UnsupportedEncodingException
 	{
-		String msg = "";
-		msg += "The page for reposiotry management:" + "<br>";
-		msg += "[repo] " + repo.getAbsolutePath() + "<br>";
-		msg += "[preload] " + preload.getAbsolutePath() + "<br>";
-		return msg;
-	}
+		String path = URLDecoder.decode(sub_uri, "UTF-8");
+		logger.info("Download '{}' from {}.", path, dir.getAbsolutePath());
 
-	@GET
-	@Path("/{all:.+}")
-	public Response download(
-			@Context HttpServletRequest request,
-			@Context HttpServletResponse response) throws FileNotFoundException, IOException
-	{
-		String path = request.getPathInfo().substring(Repo.URI_PATH.length());
-		File file = new File(repo, path);
-		if(!file.exists())
-			throw new WebApplicationException(Status.NOT_FOUND);
+		//get server file
+		File file = new File(dir, path);
+		logger.debug("Download '{}' from server.", file.getAbsolutePath());
+		if(!file.exists()){
+			logger.error("The resource '{}' is not found", file.getAbsolutePath());
+			throw new ResourceNotFoundException();
+		}
 
-		String mime = new MimetypesFileTypeMap().getContentType(file);
-		return Response.ok(file, mime).build();
+		return new FileSystemResource(file);
 	}
 	
-	/*
-	@GET
-	@Path("/preload")
-	public Viewable preloadTheFirst(@Context HttpServletRequest request)
-					throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
+	@GetMapping("/preload")
+	public String preloadTheFirst(Model model,
+			HttpServletRequest req)
+			throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
 	{
-		return preload(request, 1);
+		return preload(model, req, 1);
 	}
-	*/
 
-	@GET
-	@Path("/preload/{sn}")
-	public Viewable preload(
-			@Context HttpServletRequest request,
-			@PathParam("sn") int sn) throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
+	@GetMapping("/preload/{sn:[0-9]+}")
+	public String preload(Model model,
+			HttpServletRequest req,
+			@PathVariable("sn") int sn)
+			throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
 	{
+		logger.info("[preload] uri:     {}", req.getRequestURI());
+		logger.info("[preload] context: {}", req.getContextPath());
+		logger.info("[preload] servlet: {}", req.getServletPath());
+		logger.info("[preload] info   : {}", req.getPathInfo());
+
 		File file = getPreloadData(preload, sn);
 		if(file == null)
 			//return "No data";
-			return new Viewable("index.html");
+			return "/index.html";
 
 		if(file.isFile()){
 			//return "Audio Track: " + file.getAbsolutePath();
-			return new Viewable("index.html");
+			return "/index.html";
 		}
 		
 		if(file.isDirectory()){
 			Album album = buildAlbum(file);
-			request.setAttribute("album", album);
-			request.setAttribute("repo", repo);
-			request.setAttribute("prefixPath", JerseyConfig.URI_PATH + Repo.URI_PATH);
+
+			model.addAttribute("album", album);
+			model.addAttribute("repo", preload);
+			model.addAttribute("prefixPath", req.getContextPath() + URI_PATH + PRELOAD_PATH);
 			//return "Album: " + file.getAbsolutePath();
-			return new Viewable("/album.jsp");
+			return "album";
 		}
 
 		//return "Unknown data: " + file.getAbsolutePath();
-		return new Viewable("index.html");
+		return "/index.html";
 	}
+	
+	public static String getSubstringBeforeInclude(String s, String spliter)
+	{
+		int sp_pos = s.indexOf(spliter);
+		if(sp_pos < 0)
+			throw new RuntimeException(s + " does not contain " + spliter);
+		return s.substring(0, sp_pos + spliter.length());
+	}
+
+	public static String getSubstingAfterExclude(String s, String spliter)
+	{
+		int sp_pos = s.indexOf(spliter);
+		if(sp_pos < 0)
+			throw new RuntimeException(s + " does not contain " + spliter);
+		return s.substring(sp_pos + spliter.length());
+	}
+	
 	
 	public static void sortByFilename(File[] files)
 	{
