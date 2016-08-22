@@ -19,14 +19,14 @@
 
 <aside class="booklet">
 	<c:forEach var="booklet" items="${album.booklets}" varStatus="s">
-		<img src='<app:servPath local="${booklet}" local_home="${repo}" serv_prefix="${prefixPath}" />'
+		<img src='<app:servPath local="${booklet}" local_base="${localBase}" serv_base="${servBase}" />'
 			alt="booklet${s.count}" class="booklet-img">
     </c:forEach>
 </aside>
 
 <div style="flex:1">
     <div class="album">
-		<img src='<app:servPath local="${album.cover}" local_home="${repo}" serv_prefix="${prefixPath}" />'
+		<img src='<app:servPath local="${album.cover}" local_base="${localBase}" serv_base="${servBase}" />'
 			alt="Album Cover" class="album-cover">
 
 		<div class="album-info">
@@ -76,11 +76,11 @@
 				<div id="track${diskloop.count}-${trackloop.count}" class="track tabcontent">
 
 					<!--
-					<audio src='<app:servPath local="${track.location}" local_home="${repo}" serv_prefix="${prefixPath}" />'
+					<audio src='<app:servPath local="${track.location}" local_base="${localBase}" serv_base="${servBase}" />'
             			controls preload="none"></audio>
 					-->
 					<audio controls preload="none">
-						<source type="audio/mpeg" src='<app:servPath local="${track.location}" local_home="${repo}" serv_prefix="${prefixPath}" />' >
+						<source type="audio/mpeg" src='<app:servPath local="${track.location}" local_base="${localBase}" serv_base="${servBase}" />' />
 					</audio>
 
 					<i class="fa fa-font">

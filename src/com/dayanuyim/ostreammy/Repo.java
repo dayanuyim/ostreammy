@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -41,6 +43,7 @@ import com.dayanuyim.ostreammy.entity.Album;
 import com.dayanuyim.ostreammy.entity.AudioTrack;
 import com.dayanuyim.ostreammy.entity.Corporation;
 import com.dayanuyim.ostreammy.entity.Person;
+import com.dayanuyim.ostreammy.utils.UriFileMapper;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
@@ -52,8 +55,8 @@ import static org.apache.commons.lang3.StringUtils.*;
 @Controller
 public class Repo {
 	public static final String URI_PATH = "/repo";
-
 	public static final String PRELOAD_PATH = "/_";
+
 	public static final String DEF_ALBUM_IMG_NAME = "default_album_image";
 	public static final String ARRAY_STR_SP = ";";
 
@@ -67,6 +70,17 @@ public class Repo {
 	@Autowired
 	@Qualifier("preload") @Location
 	private File preload;
+	
+	private UriFileMapper repo_mapper;
+	private UriFileMapper preload_mapper;
+	
+	@PostConstruct
+	private void init()
+	{
+		repo_mapper = new UriFileMapper(URI_PATH, repo);
+		preload_mapper = new UriFileMapper(URI_PATH + PRELOAD_PATH, preload);
+		
+	}
 	
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
@@ -86,20 +100,32 @@ public class Repo {
 	@ResponseBody
 	public FileSystemResource download(HttpServletRequest req) throws UnsupportedEncodingException
 	{
-		String sub_uri = req.getServletPath() + defaultString(req.getPathInfo());
-		sub_uri = sub_uri.substring(URI_PATH.length());
-		return downloadFile(preload, sub_uri);
+		return download(req.getRequestURI(), repo_mapper);
 	}
 
 	@GetMapping(Repo.PRELOAD_PATH + "/**")
 	@ResponseBody
 	public FileSystemResource downloadPreload(HttpServletRequest req) throws UnsupportedEncodingException
 	{
-		String sub_uri = req.getServletPath() + defaultString(req.getPathInfo());
-		sub_uri = sub_uri.substring((URI_PATH + PRELOAD_PATH).length());
-		return downloadFile(preload, sub_uri);
+		return download(req.getRequestURI(), preload_mapper);
 	}
 	
+	public static FileSystemResource download(String uri, UriFileMapper mapper) throws UnsupportedEncodingException
+	{
+		uri = URLDecoder.decode(uri, "UTF-8");
+		logger.debug("Download '{}' from server.", uri);
+
+		File file = mapper.toFile(uri);
+		logger.debug("Download '{}' from server.", file.getAbsolutePath());
+
+		if(!file.exists()){
+			logger.error("The resource '{}' is not found", file.getAbsolutePath());
+			throw new ResourceNotFoundException();
+		}
+
+		return new FileSystemResource(file);
+	}
+	/*
 	private FileSystemResource downloadFile(File dir, String sub_uri) throws UnsupportedEncodingException
 	{
 		String path = URLDecoder.decode(sub_uri, "UTF-8");
@@ -115,6 +141,7 @@ public class Repo {
 
 		return new FileSystemResource(file);
 	}
+	*/
 	
 	@GetMapping("/preload")
 	public String preloadTheFirst(Model model,
@@ -149,8 +176,8 @@ public class Repo {
 			Album album = buildAlbum(file);
 
 			model.addAttribute("album", album);
-			model.addAttribute("repo", preload);
-			model.addAttribute("prefixPath", req.getContextPath() + URI_PATH + PRELOAD_PATH);
+			model.addAttribute("localBase", preload_mapper.getBaseFile());
+			model.addAttribute("servBase", preload_mapper.getBaseUri());
 			//return "Album: " + file.getAbsolutePath();
 			return "album";
 		}
