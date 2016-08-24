@@ -240,31 +240,21 @@ function dropBooklet(e)
     if(!isBookletTarget(e))
     	return;
 
-	var src_id = e.dataTransfer.getData("id");
-	var dst_id = e.target.id;
+	var img_id = e.dataTransfer.getData("id");
+	var pos_id = e.target.id;
 
 	//parse src/dst idx
-	var pos = src_id.lastIndexOf('-') + 1;
-	var id_pre = src_id.substring(0, pos);
-	var src_idx = parseInt(src_id.substring(pos));
+	var sp = img_id.lastIndexOf('-') + 1;
+	var src_idx = parseInt(img_id.substring(sp));
 
-	var pos = dst_id.lastIndexOf('-') + 1;
-	var dst_idx = parseInt(dst_id.substring(pos));
+	var sp = pos_id.lastIndexOf('-') + 1;
+	var dst_idx = parseInt(pos_id.substring(sp));
+	if(src_idx < dst_idx) --dst_idx;
 
 	console.log("drag: " + src_idx + " -> " + dst_idx);
 	
 	//moving images
-	var src_img = $('#' + src_id).children().detach();
-
-	if(src_idx < dst_idx){
-		dst_idx -= 1;
-		shiftBooklet(id_pre, src_idx + 1, dst_idx + 1, -1);
-	}
-	else if(src_idx > dst_idx){
-		shiftBooklet(id_pre, dst_idx, src_idx, 1);
-	}
-
-	$('#' + id_pre + dst_idx).append(src_img);
+    reindexChild('#booklet-', src_idx, dst_idx);
 	
 	//cover
 	if(dst_idx == 0 || src_idx == 0)
@@ -276,28 +266,14 @@ function dropBooklet(e)
 	e.preventDefault();
 }
 
-function shiftBooklet(id_pre, begin, end, diff)
+function rotateBookletRight(start, stop)
 {
-	begin = parseInt(begin);
-	end = parseInt(end);
-	diff = parseInt(diff);
+    rotateChild('#booklet-', start, stop, false);
+}
 
-	if(diff < 0){
-		for(var i = begin; i < end; ++i)
-		{
-			var src_id = '#' + id_pre + i;
-			var dst_id = '#' + id_pre + (i + diff);
-			$(dst_id).append($(src_id).children())
-		}
-	}
-	else if (diff > 0){
-		for(var i = end - 1; i >= begin; --i)
-		{
-			var src_id = '#' + id_pre + i;
-			var dst_id = '#' + id_pre + (i + diff);
-			$(dst_id).append($(src_id).children())
-		}
-	}
+function rotateBookletLeft(start, stop)
+{
+    rotateChild('#booklet-', start, stop, true);
 }
 
 //select tabpages ===============================
@@ -318,8 +294,12 @@ function selectPage(page_evt, content_id, type) {
     selectOnly(type + " tabcontent", document.getElementById(content_id));
 }
 
+// utils =======================================================================
 function selectOnly(class_name, active_elem)
 {
+    unselectAll(class_name);
+	elem.className += " active";
+    /*
     var elems = document.getElementsByClassName(class_name);
     for (var i = 0; i < elems.length; i++) {
         var elem = elems[i];
@@ -328,6 +308,7 @@ function selectOnly(class_name, active_elem)
         else if (!elem.className.includes(" active"))
 	        elem.className += " active";
     }
+    */
 }
 
 function unselectAll(class_name)
@@ -337,6 +318,32 @@ function unselectAll(class_name)
         var elem = elems[i];
         elem.className = elem.className.replace(" active", "");
     }
+}
+
+function reindexChild(id_pre, src_idx, dst_idx)
+{
+	if(src_idx < dst_idx)
+        rotateChild(id_pre, src_idx, dst_idx, true);  //rotate left
+	else if(src_idx > dst_idx)
+        rotateChild(id_pre, dst_idx, src_idx, false); //rotate right
+}
+
+function rotateChild(id_pre, start, stop, is_left)
+{
+    var step = is_left? 1: -1;
+    var _start = is_left? start: stop;
+    var _stop = is_left? stop: start;
+    var _end = _stop + step;
+
+    var start_elem = $(id_pre + _start).children().detach();
+
+    for(var i = _start + step; i != _end; i += step){
+        var curr = id_pre + i;
+        var prev = id_pre + i - step;
+        $(prev).append($(curr).children());
+    }
+
+    $(id_pre + _stop).append(start_elem);
 }
 
 </script>
