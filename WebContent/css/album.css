@@ -7,8 +7,18 @@ body{
     align-content: stretch;
     background: darkgray;
 }
-.booklet-img{
+.booklet-img>img{
     width: 10em;
+}
+
+.booklet-pos{
+    width: 10em;
+    height: 10px;
+    background: darkgray;
+}
+
+.booklet-pos.active{
+	background: red;
 }
 
 .album{
@@ -18,7 +28,7 @@ body{
     padding: 10px;
 }
 
-.album-cover{
+#album-cover{
 	width: 200px;
 	height: 200px;
 	margin-right: 10px;
@@ -49,7 +59,7 @@ body{
 /* ul.tab li {float: top;} */
 
 /* Change background color of links on hover */
-.tabpage:hover {background-color: #ddd;}
+.tabpage:hover{background-color: #ddd;}
 
 /* Create an active/current tablink class */
 .tabpage:focus, .tabpage.active {background-color: #ccc;}
