@@ -22,7 +22,7 @@
 		<div class=booklet-pos id="booklet-pos-${s.index}"
 			ondragenter="dragEnterBooklet(event)" ondragover="dragOverBooklet(event)" ondragleave="dragLeaveBooklet(event)" ondrop="dropBooklet(event)" ></div>
 
-		<div class="booklet-img" id="booklet-${s.index}" >
+		<div class="booklet-img" id="booklet-img-${s.index}" >
 			
 			<img src='<app:servPath local="${booklet}" local_base="${localBase}" serv_base="${servBase}" />'
 				draggable="true" ondragstart="dragBooklet(event)"
@@ -226,13 +226,13 @@ function dragOverBooklet(e)
 function dragEnterBooklet(e)
 {
     if(isBookletTarget(e))
-		selectOnly("booklet-pos", document.getElementById(e.target.id));
+		activateOnly(".booklet-pos", "#" + e.target.id);
 }
 
 function dragLeaveBooklet(e)
 {
     if(isBookletTarget(e))
-		unselectAll("booklet-pos");
+		deactivateAll(".booklet-pos");
 }
 
 function dropBooklet(e)
@@ -254,14 +254,14 @@ function dropBooklet(e)
 	console.log("drag: " + src_idx + " -> " + dst_idx);
 	
 	//moving images
-    reindexChild('#booklet-', src_idx, dst_idx);
+    reindexChild('#booklet-img-', src_idx, dst_idx);
 	
 	//cover
 	if(dst_idx == 0 || src_idx == 0)
-		$('#album-cover').attr('src', $('#booklet-0').find('img').attr('src'))
+		$('#album-cover').attr('src', $('#booklet-img-0').find('img').attr('src'))
 
 	//reset ui
-	unselectAll("booklet-pos");
+	deactivateAll(".booklet-pos");
 
 	e.preventDefault();
 }
@@ -278,72 +278,65 @@ function rotateBookletLeft(start, stop)
 
 //select tabpages ===============================
 function selectDisk(evt, disk_id) {
-    selectPage(evt, disk_id, 'disk');
+    selectPage('.disk', evt.currentTarget, disk_id);
 }
 
 function selectTrack(evt, track_id) {
     $(".active audio").trigger('pause');
-    selectPage(evt, track_id, 'track');
+    selectPage('.track', evt.currentTarget, track_id);
 }
 
-function selectPage(page_evt, content_id, type) {
-    //hightlight TabPage of type
-    selectOnly(type + " tabpage", page_evt.currentTarget.parentElement);
-    
-    //highlight TabContent of type
-    selectOnly(type + " tabcontent", document.getElementById(content_id));
+function selectPage(qualifier, page_elem, content_id)
+{
+    var page_cls = ".tabpage";
+    var content_cls = '.tabcontent';
+
+	activateOnly(qualifier + page_cls, $(page_elem).parent(page_cls)[0]);
+	activateOnly(qualifier + content_cls, "#" + content_id);
 }
 
 // utils =======================================================================
-function selectOnly(class_name, active_elem)
+function activateOnly(sels, active_sel)
 {
-    unselectAll(class_name);
-	elem.className += " active";
-    /*
-    var elems = document.getElementsByClassName(class_name);
-    for (var i = 0; i < elems.length; i++) {
-        var elem = elems[i];
-        if(elem !== active_elem)
-            elem.className = elem.className.replace(" active", "");
-        else if (!elem.className.includes(" active"))
-	        elem.className += " active";
-    }
-    */
+	$(sels).removeClass("active");
+	$(active_sel).addClass("active");
 }
 
-function unselectAll(class_name)
+function deactivateAll(sels)
 {
-    var elems = document.getElementsByClassName(class_name);
-    for (var i = 0; i < elems.length; i++) {
-        var elem = elems[i];
-        elem.className = elem.className.replace(" active", "");
-    }
+	$(sels).removeClass("active");
 }
 
-function reindexChild(id_pre, src_idx, dst_idx)
+function reindexChild(id_pre, src, dst)
 {
-	if(src_idx < dst_idx)
-        rotateChild(id_pre, src_idx, dst_idx, true);  //rotate left
-	else if(src_idx > dst_idx)
-        rotateChild(id_pre, dst_idx, src_idx, false); //rotate right
+	if(src < dst)
+        rotateChild(id_pre, src, dst, true);  //rotate left
+	else if(src > dst)
+        rotateChild(id_pre, dst, src, false); //rotate right
 }
 
 function rotateChild(id_pre, start, stop, is_left)
 {
-    var step = is_left? 1: -1;
+	if(stop - start <= 0)
+		return;
+
+    var step   = is_left? 1: -1;
     var _start = is_left? start: stop;
-    var _stop = is_left? stop: start;
+    var _stop  = is_left? stop: start;
     var _end = _stop + step;
 
-    var start_elem = $(id_pre + _start).children().detach();
+    var start_child = $(id_pre + _start).children().detach();
 
-    for(var i = _start + step; i != _end; i += step){
+    for(var i = _start; i != _end; i += step){
         var curr = id_pre + i;
-        var prev = id_pre + i - step;
-        $(prev).append($(curr).children());
+        var next = id_pre + (i + step);
+        
+        var next_child = (i == _stop)?
+        		start_child:
+        		$(next).children().detach();
+        
+        $(curr).append(next_child);
     }
-
-    $(id_pre + _stop).append(start_elem);
 }
 
 </script>
