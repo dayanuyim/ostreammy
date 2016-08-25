@@ -79,7 +79,7 @@
 				<c:forEach var="track" items="${disk}" varStatus="trackloop">
 					<li class="track tabpage">
 						<a href="#" onclick="selectTrack(event, 'track${diskloop.count}-${trackloop.count}')">
-							<i class="fa fa-music">${track.title}</i></a>
+							<i class="fa fa-headphones">${track.title}</i></a>
 					</li>
 				</c:forEach>
 			</ul>
@@ -140,30 +140,44 @@
 					<fieldset>
 						<legend>Track Information</legend>
 
-						<i class="fa fa-font">
-							<input type="text" name="track_title" placeholder="Title" value="${track.title}"/></i>
+						<div class="track-title">
+							<i class="fa fa-font"></i><label>Title</label>
+							<input type="text" name="track_title" placeholder="Title" value="${track.title}"/>
+						</div>
 							
-						<c:forEach var="artist" items="${track.artists}">
-							<i class="fa fa-user">
-								<input type="text" name="track_artist" placeholder="Artists" value="${artist.name}"/></i>
-						</c:forEach>
+						<div class="track-artists">
+							<i class="fa fa-user"></i><label>Artists</label>
+							<c:forEach var="artist" items="${track.artists}">
+								<input type="text" name="track_artist" placeholder="Artists" value="${artist.name}"/>
+							</c:forEach>
+						</div>
 
-						<i class="fa fa-user">
-							<input type="text" name="track_original_artist" placeholder="Original Artist" value="${track.originalArtist.name}"/></i>
+						<div class="track-original-artist">
+							<i class="fa fa-user"></i><label>Original Artist</label>
+							<input type="text" name="track_original_artist" placeholder="Original Artist" value="${track.originalArtist.name}"/>
+						</div>
 
-						<i class="fa fa-user">
-							<input type="text" name="track_composer" placeholder="Composer" value="${track.composer.name}"/></i>
+						<div class="track-composer">
+							<i class="fa fa-music"></i><label>Composer</label>
+							<input type="text" name="track_composer" placeholder="Composer" value="${track.composer.name}"/>
+						</div>
 
-						<i class="fa fa-font">
-							<input type="text" name="track_tags" placeholder="Tags" value="${track.tags}"/></i>
+						<div class="track-tags">
+							<i class="fa fa-tags"></i><label>Tags</label>
+							<input type="text" name="track_tags" placeholder="Tags" value="${track.tags}"/>
+						</div>
 
-						<i class="fa fa-font">
-							<input type="text" name="track_url" placeholder="url" value="${track.url}"/></i>
+						<div class="track-url">
+							<i class="fa fa-link"></i><label>URL</label>
+							<input type="text" name="track_url" placeholder="url" value="${track.url}"/>
+						</div>
 					
 					</fieldset>
 
-					<i class="fa fa-sticky-note-o">
-						<input type="text" name="track_comment" placeholder="Comment" value="${track.comment}"/></i>
+					<div class="track-comment">
+						<i class="fa fa-sticky-note-o"></i><label>Comment</label><br>
+						<textarea rows="4">${track.comment}</textarea>
+					</div>
 
 				</div>
 			</c:forEach>
