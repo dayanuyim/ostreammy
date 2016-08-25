@@ -29,8 +29,11 @@ body{
 }
 
 #album-cover{
-	width: 200px;
-	margin-right: 10px;
+	max-width: 200px;
+    max-height: 200px;
+    object-fit: contain;
+    margin-right: 10px;
+}
 }
 
 .album-info i{
@@ -93,9 +96,11 @@ body{
     display: block;
 }
 
+/*
 .tabcontent i{
 	display: block;
 }
+*/
 
 .tabcontent {
     -webkit-animation: fadeEffect 1s;
@@ -111,3 +116,42 @@ body{
     from {opacity: 0;}
     to {opacity: 1;}
 }
+
+/**** track style *******/
+.track-vbr{
+	color: white;
+	background: orange;
+	padding: 2px;
+	border-radius: 3px;
+}
+
+.track.tabcontent div>i{
+    display: inline-block;
+    width: 1em;
+	text-align: right;
+}
+
+.track.tabcontent div>label{
+	color: white;
+    background: #0b6cea;
+    margin: 3px;
+    border-radius: 3px;
+    padding: 3px;
+    width: 6em;
+    /* float: left; */
+    display: inline-block;
+    /* text-align: right; */
+}
+
+.track.tabcontent input[type=number]{
+	width: 3em;
+	border-width: 0;
+}
+
+/*
+.track.tabcontent input[type=number]::-webkit-inner-spin-button, 
+.track.tabcontent input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+*/

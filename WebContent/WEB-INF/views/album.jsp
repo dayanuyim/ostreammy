@@ -96,52 +96,71 @@
 						<source type="audio/mpeg" src='<app:servPath local="${track.location}" local_base="${localBase}" serv_base="${servBase}" />' />
 					</audio>
 
-					<i class="fa fa-font">
-						<input type="text" name="track_title" placeholder="Title" value="${track.title}"/></i>
-						
-					<c:forEach var="artist" items="${track.artists}">
-						<i class="fa fa-user">
-							<input type="text" name="track_artist" placeholder="Artists" value="${artist.name}"/></i>
-					</c:forEach>
+					<span class="track-disk-no">
+						<i class="fa fa-dot-circle-o"></i>
+						<input type="number" name="track_disk_no" min="1" value="${track.diskNo}"/>
+					</span>
 
-					<i class="fa fa-user">
-						<input type="text" name="track_original_artist" placeholder="Original Artist" value="${track.originalArtist.name}"/></i>
-
-					<i class="fa fa-user">
-						<input type="text" name="track_composer" placeholder="Composer" value="${track.composer.name}"/></i>
-
-					<i class="fa fa-dot-circle-o">
-						<input type="number" name="track_disk_no" min="1" value="${track.diskNo}"/></i>
-
-					<i class="fa fa-list-ol">
+					<span class="track-no">
+						<i class="fa fa-list-ol"></i>
 						<input type="number" name="track_no" min="1" value="${track.no}"/>
-						of<input type="number" name="track_total_no" min="1" value="${track.totalNo}"/>
-					</i>
+					</span>
 
-					<i class="fa fa-clock-o">
-						<fmt:formatDate value="${track.length}" pattern="mm:ss"/>
-						<input type="hidden" name="track_length" value="${track.length.time}" /></i>
+					<span class="track-total-no">
+						<i class="fa fa-list-alt"></i>
+						<input type="number" name="track_total_no" min="1" value="${track.totalNo}"/>
+					</span>
+					
+					<fieldset>
+						<legend>Format Information</legend>
 
-					<i class="fa fa-font">
-						<input type="text" name="track_tags" placeholder="Tags" value="${track.tags}"/></i>
+						<div class="track-length">
+							<i class="fa fa-clock-o"></i><label>Length</label><fmt:formatDate value="${track.length}" pattern="mm:ss"/>
+						</div>
 
-					<i class="fa fa-font">
-						<input type="text" name="track_url" placeholder="url" value="${track.url}"/></i>
+						<div class="track-sha1">
+							<i class="fa fa-hashtag"></i><label>SHA1</label><span>${track.sha1}</span>
+						</div>
 
-					<i class="fa fa-font">
-						<input type="text" name="track_sha1" placeholder="sha1" value="${track.sha1}" readonly /></i>
+						<div class="track-encoder">
+							<i class="fa fa-gavel"></i><label>Encoder</label><span>${track.encoder}</span>
+						</div>
 
-					<i class="fa fa-font">
-						<input type="text" name="track_encoder" placeholder="encoder" value="${track.encoder}"/></i>
+						<div class="track-bitrate">
+							<i class="fa fa-info"></i><label>Bitrate</label><span>${track.bitrate}</span>
+							<span class="track-vbr">${track.vbr? 'V': 'C'}</span>
+						</div>
 
-					<i class="fa fa-font">
-						<input type="text" name="track_bitrate" placeholder="bitrate" value="${track.bitrate}" readonly /></i>
+						<div class="track-sample-rate">
+							<i class="fa fa-info"></i><label>Sample Rate</label><span>${track.sampleRate}</span>
+						</div>
 
-					<i class="fa fa-font">
-						<input type="text" name="track_sample_rate" placeholder="sample rate" value="${track.sampleRate}" readonly /></i>
+					</fieldset>
 
-					<i class="fa fa-font">
-						<input type="text" name="track_vbr" placeholder="VBR" value="${track.vbr}" readonly /></i>
+					<fieldset>
+						<legend>Track Information</legend>
+
+						<i class="fa fa-font">
+							<input type="text" name="track_title" placeholder="Title" value="${track.title}"/></i>
+							
+						<c:forEach var="artist" items="${track.artists}">
+							<i class="fa fa-user">
+								<input type="text" name="track_artist" placeholder="Artists" value="${artist.name}"/></i>
+						</c:forEach>
+
+						<i class="fa fa-user">
+							<input type="text" name="track_original_artist" placeholder="Original Artist" value="${track.originalArtist.name}"/></i>
+
+						<i class="fa fa-user">
+							<input type="text" name="track_composer" placeholder="Composer" value="${track.composer.name}"/></i>
+
+						<i class="fa fa-font">
+							<input type="text" name="track_tags" placeholder="Tags" value="${track.tags}"/></i>
+
+						<i class="fa fa-font">
+							<input type="text" name="track_url" placeholder="url" value="${track.url}"/></i>
+					
+					</fieldset>
 
 					<i class="fa fa-sticky-note-o">
 						<input type="text" name="track_comment" placeholder="Comment" value="${track.comment}"/></i>
