@@ -2,6 +2,15 @@ body{
     display: flex;
 }
 
+form input[type=button], form input[type=submit]{
+	float: right;
+	font-size: 17px;
+	padding: 10px;
+	box-sizing: border-box;
+	border-width: 1px;
+	border-style: double;
+}
+
 .booklet{
     width: 10em;
     align-content: stretch;
@@ -159,4 +168,13 @@ body{
 .track.tabcontent textarea{
     box-sizing: border-box;
     width: 100%;
+}
+
+.track.tabcontent fieldset:last-child{
+	border-width: 0;
+}
+
+.track.tabcontent fieldset:first-child{
+	display: inline-block;
+	border-width: 0;
 }

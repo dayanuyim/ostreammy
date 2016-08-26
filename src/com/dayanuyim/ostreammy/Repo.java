@@ -395,7 +395,7 @@ public class Repo {
 		
 		//fill up track
 		AudioTrack track = new AudioTrack();
-		track.setTitle(StringUtils.isBlank(title)? file.getName(): title);
+		track.setTitle(StringUtils.isNoneBlank(title)? title: FilenameUtils.getBaseName(file.getName()));
 		track.setDiskNo(track_nos[0]);
 		track.setNo(track_nos[1]);
 		track.setTotalNo(track_nos[2]);

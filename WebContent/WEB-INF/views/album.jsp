@@ -37,6 +37,7 @@
     </c:forEach>
 </aside>
 
+<form method="post">
 <div style="flex:1">
     <div class="album">
 		<img src='<app:servPath local="${album.cover}" local_base="${localBase}" serv_base="${servBase}" />'
@@ -59,6 +60,9 @@
 			<input type="text" name="album_comment" placeholder="Comment" value="${album.comment}"/></i>
         </div>
     </div>
+
+	<input type="button" value="Edit" onclick="enableEdit()" />
+	<input type="submit" value="Save" onclick="saveAlbum()" />
 
 	<!-- disk list -->
     <ul class="disk tab">
@@ -96,45 +100,21 @@
 						<source type="audio/mpeg" src='<app:servPath local="${track.location}" local_base="${localBase}" serv_base="${servBase}" />' />
 					</audio>
 
-					<span class="track-disk-no">
-						<i class="fa fa-dot-circle-o"></i>
-						<input type="number" name="track_disk_no" min="1" value="${track.diskNo}"/>
-					</span>
-
-					<span class="track-no">
-						<i class="fa fa-list-ol"></i>
-						<input type="number" name="track_no" min="1" value="${track.no}"/>
-					</span>
-
-					<span class="track-total-no">
-						<i class="fa fa-list-alt"></i>
-						<input type="number" name="track_total_no" min="1" value="${track.totalNo}"/>
-					</span>
-					
 					<fieldset>
-						<legend>Format Information</legend>
+						<span class="track-disk-no">
+							<i class="fa fa-dot-circle-o"></i>
+							<input type="number" name="track_disk_no" min="1" value="${track.diskNo}"/>
+						</span>
+					
+						<span class="track-no">
+							<i class="fa fa-list-ol"></i>
+							<input type="number" name="track_no" min="1" value="${track.no}"/>
+						</span>
 
-						<div class="track-length">
-							<i class="fa fa-clock-o"></i><label>Length</label><fmt:formatDate value="${track.length}" pattern="mm:ss"/>
-						</div>
-
-						<div class="track-sha1">
-							<i class="fa fa-hashtag"></i><label>SHA1</label><span>${track.sha1}</span>
-						</div>
-
-						<div class="track-encoder">
-							<i class="fa fa-gavel"></i><label>Encoder</label><span>${track.encoder}</span>
-						</div>
-
-						<div class="track-bitrate">
-							<i class="fa fa-info"></i><label>Bitrate</label><span>${track.bitrate}</span>
-							<span class="track-vbr">${track.vbr? 'V': 'C'}</span>
-						</div>
-
-						<div class="track-sample-rate">
-							<i class="fa fa-info"></i><label>Sample Rate</label><span>${track.sampleRate}</span>
-						</div>
-
+						<span class="track-total-no">
+							<i class="fa fa-list-alt"></i>
+							<input type="number" name="track_total_no" min="0" value="${track.totalNo}"/>
+						</span>
 					</fieldset>
 
 					<fieldset>
@@ -173,62 +153,64 @@
 						</div>
 					
 					</fieldset>
+					
+					<fieldset>
+						<legend>Format Information</legend>
 
-					<div class="track-comment">
-						<i class="fa fa-sticky-note-o"></i><label>Comment</label><br>
-						<textarea rows="4">${track.comment}</textarea>
-					</div>
+						<div class="track-length">
+							<i class="fa fa-clock-o"></i><label>Length</label><fmt:formatDate value="${track.length}" pattern="mm:ss"/>
+						</div>
+
+						<div class="track-sha1">
+							<i class="fa fa-hashtag"></i><label>SHA1</label><span>${track.sha1}</span>
+						</div>
+
+						<div class="track-encoder">
+							<i class="fa fa-gavel"></i><label>Encoder</label><span>${track.encoder}</span>
+						</div>
+
+						<div class="track-bitrate">
+							<i class="fa fa-info"></i><label>Bitrate</label><span>${track.bitrate}</span>
+							<span class="track-vbr">${track.vbr? 'V': 'C'}</span>
+						</div>
+
+						<div class="track-sample-rate">
+							<i class="fa fa-info"></i><label>Sample Rate</label><span>${track.sampleRate}</span>
+						</div>
+
+					</fieldset>
+
+					<fieldset>
+						<div class="track-comment">
+							<i class="fa fa-sticky-note-o"></i><label>Comment</label><br>
+							<textarea rows="4">${track.comment}</textarea>
+						</div>
+					</fieldset>
 
 				</div>
 			</c:forEach>
 
 		</div>
 	</c:forEach>
-
-	<!--
-    <ul class="disk tab">
-        <li class="disk tabpage"><a href="#" onclick="selectDisk(event, 'disk1')">Disk I</a></li>
-        <li class="disk tabpage"><a href="#" onclick="selectDisk(event, 'disk2')">Disk II</a></li>
-    </ul>
-
-    <div id="disk1" class = "disk tabcontent">
-        <ul class="track tab">
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track1')">1. 修罗の花</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track2')">2. Song2</a></li>
-            <li class="track tabpage"><a href="#" onclick="selectTrack(event, 'track3')">3. Song3</a></li>
-        </ul>
-
-        <div id="track1" class="track tabcontent">
-            <h3>track1</h3>
-            <p>track1 is the capital city of England.</p>
-            <audio src="/repo/pop/梶芽衣子/修罗の花.mp3" controls loop preload="metadata"></audio>
-        </div>
-
-        <div id="track2" class="track tabcontent">
-            <h3>track2</h3>
-            <p>track2 is the capital of France.</p>
-        </div>
-
-        <div id="track3" class="track tabcontent">
-            <h3>track3</h3>
-            <p>track3 is the capital of Japan.</p>
-        </div>
-    </div>
-
-    <div id="disk2" class = "disk tabcontent">
-        <ul class="track tab">
-            <li class="tabpage"><a href="#" onclick="selectTrack(event, 'track2-1')">1. Song2-1</a></li>
-            <li class="tabpage"><a href="#" onclick="selectTrack(event, 'track2-2')">2. Song2-2</a></li>
-        </ul>
-        <div id="track2-1" class="track tabcontent"> <h3>track2-1</h3> </div>
-        <div id="track2-2" class="track tabcontent"> <h3>track2-2</h3> </div>
-    </div>
-	-->
-
+	
 </div>
-
+</form>
 </body>
+
 <script>
+
+function enableEdit()
+{
+	$('input').prop('readonly', false);
+	$('input[type=submit]').prop('disabled', false);
+}
+
+function saveAlbum()
+{
+	alert('saving');
+}
+
+
 //drag-n-drop ==================================
 function isAdjacentBookletPos(booklet_id, pos_id)
 {
@@ -371,6 +353,11 @@ function rotateChild(id_pre, start, stop, is_left)
         $(curr).append(next_child);
     }
 }
+
+$(function(){
+	$('input').prop('readonly', true);
+	$('input[type=submit]').prop('disabled', true);
+})
 
 </script>
 </html>
