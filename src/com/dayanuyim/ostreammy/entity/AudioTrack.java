@@ -3,11 +3,13 @@ package com.dayanuyim.ostreammy.entity;
 import java.io.File;
 import java.util.Date;
 
+import javax.validation.constraints.NotNull;
+
 public class AudioTrack {
 	private String title;
-	private int no;
-	private int diskNo;
-	private int totalNo;
+	private Integer no;
+	private Integer diskNo;
+	private Integer totalNo;
 	private Date length;
 	private Person[] artists;
 	private Person originalArtist;
@@ -17,10 +19,12 @@ public class AudioTrack {
 	private String comment;
 	private String sha1;
 	private String encoder;
-	private int bitrate;
-	private int sampleRate;
-	private boolean vbr;
+	private Integer bitrate;
+	private Integer sampleRate;
+	private Boolean vbr;
 	private File location;
+	
+	public AudioTrack(){}
 
 	public String getTitle() {
 		return title;
@@ -105,6 +109,9 @@ public class AudioTrack {
 	}
 	public void setBitrate(int bitrate) {
 		this.bitrate = bitrate;
+	}
+	public boolean getVbr() {
+		return vbr;
 	}
 	public boolean isVbr() {
 		return vbr;

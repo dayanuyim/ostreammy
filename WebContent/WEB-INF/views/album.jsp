@@ -17,6 +17,8 @@
 </head>
 <body>
 
+<form method="post">
+
 <aside class="booklet">
 	<c:forEach var="booklet" items="${album.booklets}" varStatus="s">
 		<div class=booklet-pos id="booklet-pos-${s.index}"
@@ -27,6 +29,9 @@
 			<img src='<app:servPath local="${booklet}" local_base="${localBase}" serv_base="${servBase}" />'
 				draggable="true" ondragstart="dragBooklet(event)"
 				alt="booklet ${s.count}" >
+
+			<input type="hidden" name="booklet"
+				value='<app:servPath local="${booklet}" local_base="${localBase}" serv_base="${servBase}" />' />
 		</div>
 		
 		<c:if test="${s.last}">
@@ -37,7 +42,6 @@
     </c:forEach>
 </aside>
 
-<form method="post">
 <div style="flex:1">
     <div class="album">
 		<img src='<app:servPath local="${album.cover}" local_base="${localBase}" serv_base="${servBase}" />'
@@ -45,19 +49,25 @@
 
 		<div class="album-info">
 			<i class="fa fa-user">
-				<input type="text" name="album_artist" placeholder="Artist" value="${album.artist.name}"/></i>
+				<input type="text" name="albumArtist" placeholder="Artist" value="${album.artist.name}"/></i>
 
 			<i class="fa fa-font">
-			<input type="text" name="album_name" placeholder="Name" value="${album.name}"/></i>
+			<input type="text" name="albumName" placeholder="Name" value="${album.name}"/></i>
+			
+			<ul>
+				<c:forEach var="tag" items="${album.tags}" >
+					<li>${tag}</li>
+				</c:forEach>
+			</ul>
 
 			<i class="fa fa-calendar-o">
-			<input type="date" name="album_date" placeholder="yyyy-mm-dd" value="${album.publishDate}"/></i>
+			<input type="date" name="albumPublishDate" placeholder="yyyy-mm-dd" value="${album.publishDate}"/></i>
 
 			<i class="fa fa-building">
-			<input type="text" name="album_publisher" placeholder="Publisher" value="${album.publisher}"/></i>
+			<input type="text" name="albumPublisher" placeholder="Publisher" value="${album.publisher}"/></i>
 
-			<i class="fa fa-sticky-note-o">
-			<input type="text" name="album_comment" placeholder="Comment" value="${album.comment}"/></i>
+			<i class="fa fa-sticky-note-o"></i><label>Comment</label><br>
+			<textarea rows="4" name="albumComment">${album.comment}</textarea>
         </div>
     </div>
 
@@ -103,12 +113,12 @@
 					<fieldset>
 						<span class="track-disk-no">
 							<i class="fa fa-dot-circle-o"></i>
-							<input type="number" name="track_disk_no" min="1" value="${track.diskNo}"/>
+							<input type="number" name="track_disk_no" min="0" value="${track.diskNo}"/>
 						</span>
 					
 						<span class="track-no">
 							<i class="fa fa-list-ol"></i>
-							<input type="number" name="track_no" min="1" value="${track.no}"/>
+							<input type="number" name="no" min="0" value="${track.no}"/>
 						</span>
 
 						<span class="track-total-no">

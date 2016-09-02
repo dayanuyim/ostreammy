@@ -1,5 +1,6 @@
 package com.dayanuyim.ostreammy;
 
+import javax.validation.Valid;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,9 +12,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.jar.Attributes.Name;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -28,14 +32,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler;
 import org.springframework.http.HttpStatus;
 
 import com.dayanuyim.ostreammy.annotation.Location;
@@ -43,12 +53,14 @@ import com.dayanuyim.ostreammy.entity.Album;
 import com.dayanuyim.ostreammy.entity.AudioTrack;
 import com.dayanuyim.ostreammy.entity.Corporation;
 import com.dayanuyim.ostreammy.entity.Person;
+import com.dayanuyim.ostreammy.entity.ValidList;
 import com.dayanuyim.ostreammy.utils.UriFileMapper;
+import com.dayanuyim.ostreammy.utils.Utils;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
-import static com.dayanuyim.ostreammy.Utils.*;
+import static com.dayanuyim.ostreammy.utils.Utils.*;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @RequestMapping(value=Repo.URI_PATH)
@@ -100,49 +112,81 @@ public class Repo {
 	@ResponseBody
 	public FileSystemResource download(HttpServletRequest req) throws UnsupportedEncodingException
 	{
-		return download(req.getRequestURI(), repo_mapper);
+		return Utils.download(req.getRequestURI(), repo_mapper);
 	}
 
 	@GetMapping(Repo.PRELOAD_PATH + "/**")
 	@ResponseBody
 	public FileSystemResource downloadPreload(HttpServletRequest req) throws UnsupportedEncodingException
 	{
-		return download(req.getRequestURI(), preload_mapper);
+		return Utils.download(req.getRequestURI(), preload_mapper);
 	}
 	
-	public static FileSystemResource download(String uri, UriFileMapper mapper) throws UnsupportedEncodingException
+	@PostMapping("/preload/{sn:[0-9]+}")
+	public String preloadSave(HttpServletRequest req, Model model)
+			//@Valid Album album,
+			//@Valid ValidList<AudioTrack> tracks)
+			throws UnsupportedEncodingException
 	{
-		uri = URLDecoder.decode(uri, "UTF-8");
-		logger.debug("Download '{}' from server.", uri);
+		req.setCharacterEncoding("UTF-8");
+		Album album = buildAlbum(req.getParameterMap());
 
-		File file = mapper.toFile(uri);
-		logger.debug("Download '{}' from server.", file.getAbsolutePath());
-
-		if(!file.exists()){
-			logger.error("The resource '{}' is not found", file.getAbsolutePath());
-			throw new ResourceNotFoundException();
-		}
-
-		return new FileSystemResource(file);
+		model.addAttribute("params", req.getParameterMap());
+		return "param_info";
 	}
+
+	private static Album buildAlbum(Map<String, String[]> params)
+	{
+		Album album = buildBareAlbum(params);
+		AudioTrack tracks[] = buildTracks(params);
+		File[] booklets = buildBooklets(params);
+
+		album.setTracks(tracks);
+		album.setBooklets(booklets);
+
+		return album;
+	}
+	
+	private static Album buildBareAlbum(Map<String, String[]> params)
+	{
+		Album album = new Album();
+		
+		//parsed
+		String name = arrayElement(params.get("albumName"), 0);
+		String publishDate = arrayElement(params.get("albumPublishDate"), 0);
+		String publisher = arrayElement(params.get("albumPublisher"), 0);
+		String artist = arrayElement(params.get("albumArtist"), 0);
+		String comment = arrayElement(params.get("albumComment"), 0);
+		
+		logger.info("name: {}", name);
+		logger.info("date: {}", publishDate);
+		logger.info("publisher: {}", publisher);
+		logger.info("name: {}", artist);
+		logger.info("comment: {}", comment);
+
+		//set 
+		album.setName(name);
+		album.setPublishDate(isEmpty(publishDate)? null: LocalDate.parse(publishDate));
+		album.setArtist(arrayElement(genPersons(artist, ARRAY_STR_SP), 0));
+		
+		logger.info("album date: {}", album.getPublishDate());
+		logger.info("album artist: {}", album.getArtist().getName());
+		
+
+		return album;
+	}
+	
+	private static File[] buildBooklets(Map<String, String[]> params)
+	{
+		return null;
+	}
+
+	private static AudioTrack[] buildTracks(Map<String, String[]> params)
+	{
+		return null;
+	}
+
 	/*
-	private FileSystemResource downloadFile(File dir, String sub_uri) throws UnsupportedEncodingException
-	{
-		String path = URLDecoder.decode(sub_uri, "UTF-8");
-		logger.info("Download '{}' from {}.", path, dir.getAbsolutePath());
-
-		//get server file
-		File file = new File(dir, path);
-		logger.debug("Download '{}' from server.", file.getAbsolutePath());
-		if(!file.exists()){
-			logger.error("The resource '{}' is not found", file.getAbsolutePath());
-			throw new ResourceNotFoundException();
-		}
-
-		return new FileSystemResource(file);
-	}
-	*/
-	
 	@GetMapping("/preload")
 	public String preloadTheFirst(Model model,
 			HttpServletRequest req)
@@ -150,18 +194,14 @@ public class Repo {
 	{
 		return preload(model, req, 1);
 	}
+	*/
 
 	@GetMapping("/preload/{sn:[0-9]+}")
-	public String preload(Model model,
-			HttpServletRequest req,
-			@PathVariable("sn") int sn)
+	public String preload(HttpServletRequest req,
+			Model model,
+			@PathVariable int sn)
 			throws UnsupportedTagException, InvalidDataException, IOException, NoSuchAlgorithmException
 	{
-		logger.info("[preload] uri:     {}", req.getRequestURI());
-		logger.info("[preload] context: {}", req.getContextPath());
-		logger.info("[preload] servlet: {}", req.getServletPath());
-		logger.info("[preload] info   : {}", req.getPathInfo());
-
 		File file = getPreloadData(preload, sn);
 		if(file == null)
 			//return "No data";
@@ -185,24 +225,6 @@ public class Repo {
 		//return "Unknown data: " + file.getAbsolutePath();
 		return "/index.html";
 	}
-	
-	public static String getSubstringBeforeInclude(String s, String spliter)
-	{
-		int sp_pos = s.indexOf(spliter);
-		if(sp_pos < 0)
-			throw new RuntimeException(s + " does not contain " + spliter);
-		return s.substring(0, sp_pos + spliter.length());
-	}
-
-	public static String getSubstingAfterExclude(String s, String spliter)
-	{
-		int sp_pos = s.indexOf(spliter);
-		if(sp_pos < 0)
-			throw new RuntimeException(s + " does not contain " + spliter);
-		return s.substring(sp_pos + spliter.length());
-	}
-	
-	
 	public static void sortByFilename(File[] files)
 	{
 		Arrays.sort(files, (File f1, File f2) -> f1.getName().compareTo(f2.getName()));
@@ -249,7 +271,7 @@ public class Repo {
 		if(StringUtils.isBlank(album.getName())) album.setName(dir.getName());
 
 		if(album.getArtist() == null && tracks.size() > 0)
-			album.setArtist((Person) arrayElement(tracks.get(0).getArtists(), 0));
+			album.setArtist( arrayElement(tracks.get(0).getArtists(), 0));
 
 		if(tracks.size() > 0){
 			//tracks.sort((AudioTrack t1, AudioTrack t2) -> t1.compareTo(t2));
@@ -260,7 +282,7 @@ public class Repo {
 
 		if(booklets.size() > 0){
 			//add embedded album image
-			File embed_album_img = (File) arrayElement(album.getBooklets(), 0);
+			File embed_album_img =  arrayElement(album.getBooklets(), 0);
 			if(embed_album_img != null)
 				booklets.add(embed_album_img);
 			album.setBooklets(booklets.toArray(new File[0]));
@@ -348,8 +370,8 @@ public class Repo {
 		//build album
 		Album album = new Album();
 		album.setName(album_name);
-		album.setArtist((Person)arrayElement(artists, 0));
-		album.setPublisher((Corporation)arrayElement(publishers, 0));
+		album.setArtist(arrayElement(artists, 0));
+		album.setPublisher(arrayElement(publishers, 0));
 		if(year_num > 0) album.setPublishDate(LocalDate.ofYearDay(year_num, 1));
 		if(album_img_file != null) album.setBooklets(new File[]{album_img_file});
 		
@@ -401,8 +423,8 @@ public class Repo {
 		track.setTotalNo(track_nos[2]);
 		track.setLength(new Date(mp3.getLengthInMilliseconds()));
 		track.setArtists(artists);
-		track.setOriginalArtist((Person)arrayElement(orig_artists, 0));
-		track.setComposer((Person)arrayElement(composers, 0));  //only the first person
+		track.setOriginalArtist(arrayElement(orig_artists, 0));
+		track.setComposer(arrayElement(composers, 0));  //only the first person
 		track.setTags(StringUtils.join(tags, ARRAY_STR_SP));
 		track.setComment(comment);
 		track.setUrl(url);

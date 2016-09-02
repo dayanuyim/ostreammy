@@ -6,11 +6,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 public class Album {
 	private String id;
+	
+	@NotNull
+	@Size(min=1)
 	private String name;
+
 	private Person artist;
 	private String tags;
 	private LocalDate publishDate;
