@@ -21,7 +21,7 @@ public class Album {
 	private Person artist;
 	private String tags;
 	private LocalDate publishDate;
-	private Corporation publisher;
+	private String publisher;
 	private AudioTrack[] tracks;
 	private File[] booklets;
 	private File[] others;
@@ -57,10 +57,10 @@ public class Album {
 	public void setPublishDate(LocalDate publishDate) {
 		this.publishDate = publishDate;
 	}
-	public Corporation getPublisher() {
+	public String getPublisher() {
 		return publisher;
 	}
-	public void setPublisher(Corporation publisher) {
+	public void setPublisher(String publisher) {
 		this.publisher = publisher;
 	}
 	public AudioTrack[] getTracks() {

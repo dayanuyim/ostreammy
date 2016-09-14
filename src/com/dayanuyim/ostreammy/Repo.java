@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitterReturnValueHandler;
 import org.springframework.http.HttpStatus;
 
@@ -123,13 +124,12 @@ public class Repo {
 	}
 	
 	@PostMapping("/preload/{sn:[0-9]+}")
-	public String preloadSave(HttpServletRequest req, Model model)
+	public String preloadSave(MultipartHttpServletRequest req, Model model)
 			//@Valid Album album,
 			//@Valid ValidList<AudioTrack> tracks)
 			throws UnsupportedEncodingException
 	{
-		req.setCharacterEncoding("UTF-8");
-		Album album = buildAlbum(req.getParameterMap());
+		//Album album = buildAlbum(req.getParameterMap());
 
 		model.addAttribute("params", req.getParameterMap());
 		return "param_info";
@@ -147,16 +147,22 @@ public class Repo {
 		return album;
 	}
 	
+	private static String getParam(String[] params){
+		return trim(elementFirst(params));
+	}
+	
+	
 	private static Album buildBareAlbum(Map<String, String[]> params)
 	{
 		Album album = new Album();
 		
 		//parsed
-		String name = arrayElement(params.get("albumName"), 0);
-		String publishDate = arrayElement(params.get("albumPublishDate"), 0);
-		String publisher = arrayElement(params.get("albumPublisher"), 0);
-		String artist = arrayElement(params.get("albumArtist"), 0);
-		String comment = arrayElement(params.get("albumComment"), 0);
+		String name =         getParam(params.get("albumName"));
+		String publishDate = getParam(params.get("albumPublishDate"));
+		String publisher =   getParam(params.get("albumPublisher"));
+		String artist =      getParam(params.get("albumArtist"));
+		String comment =     getParam(params.get("albumComment"));
+		//tags
 		
 		logger.info("name: {}", name);
 		logger.info("date: {}", publishDate);
@@ -167,13 +173,19 @@ public class Repo {
 		//set 
 		album.setName(name);
 		album.setPublishDate(isEmpty(publishDate)? null: LocalDate.parse(publishDate));
-		album.setArtist(arrayElement(genPersons(artist, ARRAY_STR_SP), 0));
+		album.setPublisher(publisher);
+		album.setArtist(Person.from(artist));
+		album.setComment(comment);
 		
 		logger.info("album date: {}", album.getPublishDate());
 		logger.info("album artist: {}", album.getArtist().getName());
 		
 
 		return album;
+	}
+	
+	public static String getFirstPart(String s){
+		return trim(elementFirst(split(s, ARRAY_STR_SP)));
 	}
 	
 	private static File[] buildBooklets(Map<String, String[]> params)
@@ -271,7 +283,7 @@ public class Repo {
 		if(StringUtils.isBlank(album.getName())) album.setName(dir.getName());
 
 		if(album.getArtist() == null && tracks.size() > 0)
-			album.setArtist( arrayElement(tracks.get(0).getArtists(), 0));
+			album.setArtist( elementFirst(tracks.get(0).getArtists()));
 
 		if(tracks.size() > 0){
 			//tracks.sort((AudioTrack t1, AudioTrack t2) -> t1.compareTo(t2));
@@ -282,7 +294,7 @@ public class Repo {
 
 		if(booklets.size() > 0){
 			//add embedded album image
-			File embed_album_img =  arrayElement(album.getBooklets(), 0);
+			File embed_album_img =  elementFirst(album.getBooklets());
 			if(embed_album_img != null)
 				booklets.add(embed_album_img);
 			album.setBooklets(booklets.toArray(new File[0]));
@@ -363,15 +375,15 @@ public class Repo {
 
 		//parsing data
 		int year_num = NumberUtils.toInt(year, 0);
-		Corporation[] publishers = genCorporations(publisher, ARRAY_STR_SP);
+		//Corporation[] publishers = genCorporations(publisher, ARRAY_STR_SP);
 		Person[] artists = genPersons(album_artist, ARRAY_STR_SP);
 		File album_img_file = getAlbumImageFile(file,album_img, album_img_mime);
 		
 		//build album
 		Album album = new Album();
 		album.setName(album_name);
-		album.setArtist(arrayElement(artists, 0));
-		album.setPublisher(arrayElement(publishers, 0));
+		album.setArtist(elementFirst(artists));
+		album.setPublisher(publisher);
 		if(year_num > 0) album.setPublishDate(LocalDate.ofYearDay(year_num, 1));
 		if(album_img_file != null) album.setBooklets(new File[]{album_img_file});
 		
@@ -411,8 +423,7 @@ public class Repo {
 		//parsing data ================================================
 		int[] track_nos = parseTrackNo(track_no);
 		Person[] artists = genPersons(artist, ARRAY_STR_SP);
-		Person[] orig_artists = genPersons(orig_artist, ARRAY_STR_SP);
-		Person[] composers = genPersons(composer, ARRAY_STR_SP);
+		Person _orig_artist = new Person(getFirstPart(orig_artist));
 		String[] tags = uniqueSplit(genre_desc, ARRAY_STR_SP);
 		
 		//fill up track
@@ -423,8 +434,8 @@ public class Repo {
 		track.setTotalNo(track_nos[2]);
 		track.setLength(new Date(mp3.getLengthInMilliseconds()));
 		track.setArtists(artists);
-		track.setOriginalArtist(arrayElement(orig_artists, 0));
-		track.setComposer(arrayElement(composers, 0));  //only the first person
+		track.setOriginalArtist(_orig_artist);
+		track.setComposer(new Person(getFirstPart(composer)));
 		track.setTags(StringUtils.join(tags, ARRAY_STR_SP));
 		track.setComment(comment);
 		track.setUrl(url);

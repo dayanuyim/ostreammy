@@ -32,4 +32,16 @@ public class Person {
 	public void setBirthday(LocalDate birthday) {
 		this.birthday = birthday;
 	}
+	
+	public Person(){}
+	
+	public Person(String name){
+		this.name = name;
+	}
+	
+	//=====================
+	public static Person from(String s){
+		return s == null? null: new Person(s);
+	}
+	
 }

@@ -17,7 +17,7 @@
 </head>
 <body>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 
 <aside class="booklet">
 	<c:forEach var="booklet" items="${album.booklets}" varStatus="s">
